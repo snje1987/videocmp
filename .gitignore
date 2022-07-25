@@ -1,0 +1,9 @@
+/vendor/
+/ttfs/
+/data/
+/tmp/
+/config.php
+/vendor-bin/*/*
+!/vendor-bin/*/composer.json
+!/vendor-bin/*/composer.lock
+*.swp

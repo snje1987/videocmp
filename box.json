@@ -1,0 +1,40 @@
+{
+  "directories": ["src", "vendor", "res"],
+  "files": ["COPYING"],
+  "blacklist": ["tests"],
+  "main": "src/index.php",
+  "output":"build/videocmp.phar",
+  "finder": [
+    {
+      "in": "src",
+      "name": "*.*"
+    },
+    {
+      "in": "vendor",
+      "name": "*.php",
+      "exclude": [
+        "CHANGELOG",
+        "CONTRIBUTING",
+        "README",
+        "Tests",
+        "behat",
+        "ext",
+        "bin",
+        "build",
+        "doc",
+        "docs",
+        "doc-template",
+        "fixtures",
+        "test",
+        "tests",
+        "test_old",
+        "vendor-bin"
+      ]
+    }
+  ],
+  "compression": "GZ",
+  "compactors": [
+    "KevinGH\\Box\\Compactor\\Json",
+    "KevinGH\\Box\\Compactor\\Php"
+  ]
+}

@@ -1,0 +1,259 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "402c1f302cb7dfb180583c472caa0106",
+    "packages": [
+        {
+            "name": "minifw/common",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/minifw/common.git",
+                "reference": "99f0c473adddb6f73cc28b44896fae4b2e41157f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/minifw/common/zipball/99f0c473adddb6f73cc28b44896fae4b2e41157f",
+                "reference": "99f0c473adddb6f73cc28b44896fae4b2e41157f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.5"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": false,
+                    "forward-command": true
+                },
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Minifw\\Common\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Yang Ming",
+                    "email": "yangming0116@163.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "common data for minifw",
+            "homepage": "https://github.com/minifw/common",
+            "keywords": [
+                "framework",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/minifw/common/issues",
+                "source": "https://github.com/minifw/common/tree/master"
+            },
+            "time": "2022-07-23T07:28:13+00:00"
+        },
+        {
+            "name": "minifw/console",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/minifw/console.git",
+                "reference": "d4a606100b389c57dd9ffd0dffc715e7c341dfd7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/minifw/console/zipball/d4a606100b389c57dd9ffd0dffc715e7c341dfd7",
+                "reference": "d4a606100b389c57dd9ffd0dffc715e7c341dfd7",
+                "shasum": ""
+            },
+            "require": {
+                "minifw/common": "^v1.0",
+                "php": ">=7.4"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.5"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": false,
+                    "forward-command": true
+                },
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Minifw\\Console\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Yang Ming",
+                    "email": "yangming0116@163.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "php console control",
+            "homepage": "https://github.com/minifw/console",
+            "keywords": [
+                "console",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/minifw/console/issues",
+                "source": "https://github.com/minifw/console/tree/master"
+            },
+            "time": "2022-07-25T04:42:20+00:00"
+        },
+        {
+            "name": "minifw/db",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/minifw/db.git",
+                "reference": "5fb70702c58aec547f644139642bdd1008886155"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/minifw/db/zipball/5fb70702c58aec547f644139642bdd1008886155",
+                "reference": "5fb70702c58aec547f644139642bdd1008886155",
+                "shasum": ""
+            },
+            "require": {
+                "minifw/common": "^1.0",
+                "php": ">=7.4"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.5"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": false,
+                    "forward-command": true
+                },
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Minifw\\DB\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Yang Ming",
+                    "email": "yangming0116@163.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Database Tool",
+            "homepage": "https://github.com/minifw/db",
+            "keywords": [
+                "framework",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/minifw/db/issues",
+                "source": "https://github.com/minifw/db/tree/master"
+            },
+            "time": "2022-07-24T00:50:17+00:00"
+        }
+    ],
+    "packages-dev": [
+        {
+            "name": "bamarni/composer-bin-plugin",
+            "version": "1.8.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bamarni/composer-bin-plugin.git",
+                "reference": "24764700027bcd3cb072e5f8005d4a150fe714fe"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bamarni/composer-bin-plugin/zipball/24764700027bcd3cb072e5f8005d4a150fe714fe",
+                "reference": "24764700027bcd3cb072e5f8005d4a150fe714fe",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^2.0",
+                "php": "^7.2.5 || ^8.0"
+            },
+            "require-dev": {
+                "composer/composer": "^2.0",
+                "ext-json": "*",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan": "^1.8",
+                "phpstan/phpstan-phpunit": "^1.1",
+                "phpunit/phpunit": "^8.5 || ^9.5",
+                "symfony/console": "^5.4.7 || ^6.0.7",
+                "symfony/finder": "^5.4.7 || ^6.0.7",
+                "symfony/process": "^5.4.7 || ^6.0.7"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Bamarni\\Composer\\Bin\\BamarniBinPlugin"
+            },
+            "autoload": {
+                "psr-4": {
+                    "Bamarni\\Composer\\Bin\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "No conflicts for your bin dependencies",
+            "keywords": [
+                "composer",
+                "conflict",
+                "dependency",
+                "executable",
+                "isolation",
+                "tool"
+            ],
+            "support": {
+                "issues": "https://github.com/bamarni/composer-bin-plugin/issues",
+                "source": "https://github.com/bamarni/composer-bin-plugin/tree/1.8.0"
+            },
+            "time": "2022-07-14T10:29:51+00:00"
+        }
+    ],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=7.0",
+        "ext-sqlite3": "*"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
+}
