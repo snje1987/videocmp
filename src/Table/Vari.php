@@ -40,8 +40,6 @@ class Vari extends Table
             }
 
             $oldVal = $old[$name] ?? null;
-            $oldVal = self::decodeValue($cfg[$name], $oldVal);
-
             $value = self::encodeValue($cfg[$name], $value, $oldVal);
             if ($value !== null) {
                 if (isset($old[$name])) {
@@ -87,21 +85,21 @@ class Vari extends Table
         switch ($cfg['type']) {
             case self::TYPE_INT:
                 $value = (int) $value;
-                if ($value === $oldVal) {
+                if ($oldVal !== null && $value === (int) $oldVal) {
                     return null;
                 }
 
                 return $value;
             case self::TYPE_STRING:
                 $value = (string) $value;
-                if ($value === $oldVal) {
+                if ($oldVal !== null && $value === (string) $oldVal) {
                     return null;
                 }
 
                 return $value;
             case self::TYPE_RAW:
                 $value = (string) $value;
-                if ($value === $oldVal) {
+                if ($oldVal !== null && $value === (string) $oldVal) {
                     return null;
                 }
 
