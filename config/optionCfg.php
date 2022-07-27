@@ -7,24 +7,26 @@ return [
         'usage: videocmp [action] [options] file|dir ...',
         '视频对比工具，可以分析视频的相似度，查找相似的视频',
     ],
-    'options' => [
+    'template' => [
         'distance' => [
             'alias' => 'd',
-            'comment' => '相似度判定参数，0-5，数字越大容忍度越高',
+            'comment' => '相似度判定参数，0-7，数字越大容忍度越高',
             'defalut' => 2,
             'paramType' => Option::PARAM_INT,
         ],
+    ],
+    'global' => [
         'database' => [
             'alias' => ['db'],
             'comment' => '数据库文件的位置',
             'default' => '',
-            'paramType' => Option::PARAM_FILE
+            'paramType' => Option::PARAM_PATH
         ],
         'config' => [
             'alias' => ['c'],
             'comment' => '配置文件的路径，默认为用户主目录下的 `.videocmp/config.json`',
             'default' => '',
-            'paramType' => Option::PARAM_FILE
+            'paramType' => Option::PARAM_PATH
         ],
     ],
     'actions' => [
@@ -38,22 +40,17 @@ return [
                     'paramType' => Option::PARAM_BOOL,
                 ],
                 'distance',
-                'config',
-                'database',
             ]
         ],
         'findimg' => [
             'comment' => ['查找指定图片是否出现在数据库中的视频内'],
             'options' => [
                 'distance',
-                'config',
-                'database',
             ]
         ],
         'config' => [
             'comment' => ['修改或查询程序的各项配置'],
             'options' => [
-                'config',
                 'get' => [
                     'alias' => 'g',
                     'comment' => '查询配置项',

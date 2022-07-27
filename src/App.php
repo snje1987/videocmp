@@ -22,43 +22,96 @@ namespace Org\Snje\Videocmp;
 use Minifw\Common\Exception;
 use Minifw\Console\Console;
 use Minifw\Console\OptionParser;
+use Minifw\DB\Driver;
+use Minifw\DB\Driver\Sqlite3;
 
 class App
 {
     protected Console $console;
     protected Config $config;
     protected OptionParser $parser;
+    protected ?Driver $driver = null;
+    protected array $options;
+    protected array $input;
+    protected string $function;
+    protected static ?self $instance = null;
 
-    public function __construct()
+    public static function get($argv) : ?self
     {
-        $this->config = new Config(DATA_DIR . '/config.json');
+        if (self::$instance === null) {
+            try {
+                self::$instance = new self($argv);
+            } catch (Exception $ex) {
+                $msg = $ex->getMessage();
+                if (defined('DEBUG') && DEBUG) {
+                    $msg = $ex->getFile() . '[' . $ex->getLine() . ']: ' . $msg;
+                }
+                echo $msg . "\n";
+
+                return null;
+            }
+        }
+
+        return self::$instance;
+    }
+
+    protected function __construct($argv)
+    {
+        $this->console = new Console();
+
+        $options = require(APP_ROOT . '/config/optionCfg.php');
+        $this->parser = new OptionParser($options);
+
+        array_shift($argv);
+        $info = $this->parser->parse($argv);
+
+        $this->options = $info['options'];
+        $this->input = $info['input'];
+        $action = $info['action'];
+
+        $this->function = 'do' . ucfirst($action);
+        if (!method_exists($this, $this->function)) {
+            throw new Exception('操作不存在');
+        }
+
+        $this->init($info['global']);
+    }
+
+    protected function init(array $global) : void
+    {
+        if (!empty($global['database'])) {
+            $config = [];
+            $config['file'] = $global['database'];
+            $this->driver = new Sqlite3($config);
+        }
+
+        if (!empty($global['config'])) {
+            $configPath = $global['config'];
+        } else {
+            $configPath = DATA_DIR . '/config.json';
+        }
+
+        $this->config = new Config($configPath);
         if ($this->config->get('debug')) {
             define('DEBUG', 1);
         } else {
             define('DEBUG', 0);
         }
 
-        $this->console = new Console();
-
-        $options = require(APP_ROOT . '/config/optionCfg.php');
-        $this->parser = new OptionParser($options);
+        if ($this->driver === null) {
+            $database = $this->config->get('database');
+            if (!empty($database)) {
+                $config = [];
+                $config['file'] = $database;
+                $this->driver = new Sqlite3($config);
+            }
+        }
     }
 
-    public function run(array $argv) : void
+    public function run() : void
     {
         try {
-            array_shift($argv);
-            $action = array_shift($argv);
-
-            $action = $this->parser->getAction($action);
-            $options = $this->parser->getOptions($action, $argv);
-
-            $function = 'do' . ucfirst($action);
-            if (!method_exists($this, $function)) {
-                throw new Exception('操作不存在');
-            }
-
-            call_user_func([$this, $function], $options);
+            call_user_func([$this, $this->function], $this->options);
         } catch (Exception $ex) {
             $msg = $ex->getMessage();
             if (DEBUG) {
@@ -69,16 +122,21 @@ class App
         }
     }
 
+    public function getDriver() : ?Driver
+    {
+        return $this->driver;
+    }
+
     /////////////////////////////////////
 
-    protected function doConfig(array $opts) : void
+    protected function doConfig() : void
     {
-        if (!empty($opts['options']['get'])) {
-            $name = $opts['options']['get'];
+        if (!empty($this->options['get'])) {
+            $name = $this->options['get'];
             echo $this->config->show($name) . "\n";
         }
-        if (!empty($opts['options']['set'])) {
-            $pair = $opts['options']['set'];
+        if (!empty($this->options['set'])) {
+            $pair = $this->options['set'];
             $this->config->set($pair[0], $pair[1])->save();
             echo $this->config->show($pair[0]) . "\n";
         }

@@ -21,6 +21,7 @@ namespace Org\Snje\Videocmp;
 
 use Minifw\Common\Exception;
 use Minifw\Common\File;
+use Minifw\Console\Utils;
 
 class Config
 {
@@ -47,7 +48,7 @@ class Config
 
     public function save() : self
     {
-        $json = json_encode($this->data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        $json = json_encode($this->data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
         $file = new File($this->path);
         $file->putContent($json);
@@ -69,7 +70,7 @@ class Config
         if (isset($this->data[$name])) {
             $value = $this->data[$name];
 
-            return json_encode($value, JSON_UNESCAPED_UNICODE, JSON_UNESCAPED_SLASHES);
+            return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         }
 
         return 'null';
@@ -81,11 +82,11 @@ class Config
             if (isset($this->data[$name])) {
                 unset($this->data[$name]);
             }
-        } elseif (!isset($this->dataType[$name])) {
+        } elseif (!isset(self::$dataType[$name])) {
             throw new Exception('参数不合法');
         }
 
-        switch ($this->dataType[$name]) {
+        switch (self::$dataType[$name]) {
             case self::TYPE_BOOL:
                 if (!is_bool($value)) {
                     if (is_string($value)) {
@@ -112,6 +113,21 @@ class Config
                 }
                 $value = (int) $value;
                 break;
+            case self::TYPE_FILE:
+                if (!is_string($value)) {
+                    throw new Exception('参数不合法');
+                }
+                if (!file_exists($value)) {
+                    throw new Exception('文件不存在');
+                }
+                $value = Utils::getFullPath($value);
+                break;
+            case self::TYPE_PATH:
+                if (!is_string($value)) {
+                    throw new Exception('参数不合法');
+                }
+                $value = Utils::getFullPath($value);
+                break;
             default:
                 throw new Exception('参数不合法');
         }
@@ -123,21 +139,29 @@ class Config
 
     ///////////////////////////////////////
 
-    protected function mergeConfig(array $new_data) : void
+    protected function mergeConfig(array $newData) : void
     {
-        if (!empty($new_data['debug']) && $new_data['debug']) {
-            $this->data['debug'] = true;
+        foreach (self::$dataType as $name => $type) {
+            if (array_key_exists($name, $newData)) {
+                try {
+                    $this->set($name, $newData[$name]);
+                } catch (Exception $ex) {
+                }
+            }
         }
     }
     protected string $path;
     protected array $data = [
         'debug' => false,
+        'database' => null,
     ];
-    protected array $dataType = [
+    protected static array $dataType = [
         'debug' => self::TYPE_BOOL,
-        'database' => self::TYPE_STRING,
+        'database' => self::TYPE_PATH,
     ];
     const TYPE_BOOL = 1;
     const TYPE_STRING = 2;
     const TYPE_INT = 3;
+    const TYPE_FILE = 4;
+    const TYPE_PATH = 5;
 }

@@ -71,12 +71,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minifw/console.git",
-                "reference": "0a31219abb12494c83d0211edc47c1487dd6f2d0"
+                "reference": "6b08b1236cbddbd49ed8f0aeca59e1149b9bd9d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minifw/console/zipball/0a31219abb12494c83d0211edc47c1487dd6f2d0",
-                "reference": "0a31219abb12494c83d0211edc47c1487dd6f2d0",
+                "url": "https://api.github.com/repos/minifw/console/zipball/6b08b1236cbddbd49ed8f0aeca59e1149b9bd9d8",
+                "reference": "6b08b1236cbddbd49ed8f0aeca59e1149b9bd9d8",
                 "shasum": ""
             },
             "require": {
@@ -123,7 +123,7 @@
                 "issues": "https://github.com/minifw/console/issues",
                 "source": "https://github.com/minifw/console/tree/master"
             },
-            "time": "2022-07-27T00:12:11+00:00"
+            "time": "2022-07-27T07:07:54+00:00"
         },
         {
             "name": "minifw/db",
@@ -131,12 +131,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minifw/db.git",
-                "reference": "5fb70702c58aec547f644139642bdd1008886155"
+                "reference": "5aee3a411a0299a0b29b28e43106bd24d2e31087"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minifw/db/zipball/5fb70702c58aec547f644139642bdd1008886155",
-                "reference": "5fb70702c58aec547f644139642bdd1008886155",
+                "url": "https://api.github.com/repos/minifw/db/zipball/5aee3a411a0299a0b29b28e43106bd24d2e31087",
+                "reference": "5aee3a411a0299a0b29b28e43106bd24d2e31087",
                 "shasum": ""
             },
             "require": {
@@ -183,7 +183,7 @@
                 "issues": "https://github.com/minifw/db/issues",
                 "source": "https://github.com/minifw/db/tree/master"
             },
-            "time": "2022-07-24T00:50:17+00:00"
+            "time": "2022-07-27T08:56:31+00:00"
         }
     ],
     "packages-dev": [

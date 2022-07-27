@@ -17,34 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Org\Snje\Videocmp;
+use Org\Snje\Videocmp\App;
 
-$root = dirname(__DIR__);
-require_once $root . '/vendor/autoload.php';
+require __DIR__ . '/bootstrap.php';
 
-if (PHP_SAPI !== 'cli') {
-    die('only can be used in cli mode.');
+$app = App::get($argv);
+if ($app !== null) {
+    $app->run();
 }
-
-if (!defined('APP_ROOT')) {
-    define('APP_ROOT', dirname(__DIR__));
-}
-
-if (!defined('DATA_DIR')) {
-    $dataDir = getenv("HOME");
-    if (empty($dataDir)) {
-        $dataDir = rtrim(sys_get_temp_dir(), '\\/');
-    } else {
-        $dataDir = rtrim($dataDir, '\\/');
-    }
-
-    $dataDir .= '/.videocmp';
-
-    if (!file_exists($dataDir)) {
-        mkdir($dataDir, 0777, true);
-    }
-    define('DATA_DIR', $dataDir);
-}
-
-$app = new App();
-$app->run($argv);
