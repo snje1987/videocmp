@@ -179,9 +179,6 @@ class App
     {
         $result = [];
         $out = $options['out'];
-        if (file_exists($out)) {
-            file_put_contents($out, '');
-        }
 
         $parser = new VideoParser($this);
         foreach ($input as $path) {
@@ -198,8 +195,31 @@ class App
                 try {
                     $ret = $parser->parse($file, $relPath, $options);
                     if (!empty($ret)) {
-                        $ret['src'] = $relPath;
-                        file_put_contents($out, json_encode($ret, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . "\n", FILE_APPEND);
+                        $lines = [];
+                        if (isset($ret['total'])) {
+                            $lines[] = '[' . $ret['total'] . '] ' . $relPath;
+                        } else {
+                            $lines[] = $relPath;
+                        }
+                        if (isset($ret['same'])) {
+                            $lines[] = '相同文件: ' . $ret['same'];
+                        }
+                        if (isset($ret['replace'])) {
+                            $lines[] = '替换文件: ' . $ret['replace'];
+                        }
+                        if (isset($ret['match'])) {
+                            foreach ($ret['match'] as $value) {
+                                $line = str_pad($value['pecent1'], 7, ' ', STR_PAD_LEFT) . '‰ ' . str_pad($value['pecent2'], 7, ' ', STR_PAD_LEFT) . '‰';
+
+                                $line .= ' [' . $value['match'] . '/' . $value['total'] . ']';
+                                $line .= ' ' . $value['path'];
+                                $lines[] = $line;
+                            }
+                        }
+
+                        $lines[] = '';
+
+                        file_put_contents($out, implode("\n", $lines) . "\n", FILE_APPEND);
                     }
 
                     if ($options['save']) {

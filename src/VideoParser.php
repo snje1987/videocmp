@@ -31,6 +31,12 @@ class VideoParser
 {
     public function parse(File $file, string $pathShow, array $options)
     {
+        if ($options['match'] < 1 || $options['match'] > 1000) {
+            throw new Exception('选项参数不合法: --match');
+        }
+        if ($options['distance'] < 0 || $options['distance'] > 3) {
+            throw new Exception('选项参数不合法: --distance');
+        }
         try {
             $this->curFilePath = $file->getFsPath();
             $this->curFileShow = $pathShow;
@@ -43,7 +49,7 @@ class VideoParser
             $this->frameDelay = 0;
 
             if (!self::isVideo($this->curFilePath)) {
-                throw new Exception($this->curFileShow . " \033[32mskip\033[0m");
+                throw new Exception($this->curFileShow . " \033[32m跳过\033[0m");
             }
 
             $size = filesize($this->curFilePath);
@@ -134,23 +140,24 @@ class VideoParser
                 continue;
             }
 
-            $pecent = (double) (count($this->matchFrames[$id]) * 100 / $info['frames']);
-            $pecent2 = (double) (count($this->matchFrames[$id]) * 100 * self::FRAME_STEP / $this->frameTotal);
+            $matchFrames = count($this->matchFrames[$id]);
+            $pecent1 = (double) ($matchFrames * 1000 * self::FRAME_STEP / $this->frameTotal);
+            $pecent2 = (double) ($matchFrames * 1000 / $info['frames']);
 
-            if ($pecent2 > $pecent) {
-                $pecent = $pecent2;
-            }
-
-            if ($pecent > 10) {
+            if ($pecent1 >= $this->options['match'] || $pecent2 >= $this->options['match']) {
                 $matchFile[] = [
                     'path' => $info['path'],
-                    'pecent' => round($pecent, 2),
+                    'match' => $matchFrames,
+                    'total' => $info['frames'],
+                    'pecent1' => number_format($pecent1, 2),
+                    'pecent2' => number_format($pecent2, 2),
                 ];
             }
         }
 
         if (!empty($matchFile)) {
             return [
+                'total' => $this->frameTotal,
                 'match' => $matchFile,
             ];
         }
@@ -213,7 +220,7 @@ class VideoParser
             $this->frameTotal++;
 
             $hashs = [];
-            for ($i = 0; $i < 4; $i++) {
+            for ($i = 0; $i < 8; $i += 2) {
                 $hashs[] = ord($this->buffer[$i]) << 8 | ord($this->buffer[$i + 1]);
             }
             $this->buffer = substr($this->buffer, 8);
@@ -348,9 +355,16 @@ class VideoParser
             ->where(['size' => $size])->all()->exec();
 
         $sha = null;
+        $isInDb = false;
         if (!empty($dbFile)) {
-            $sha = sha1_file($file->getFsPath(), false);
             foreach ($dbFile as $one) {
+                if ($one['path'] == $this->curFileShow) {
+                    $isInDb = true;
+                    continue;
+                }
+                if ($sha === null) {
+                    $sha = sha1_file($file->getFsPath(), false);
+                }
                 if ($sha === $one['sha']) {
                     if ($this->options['save'] && $this->options['replace']) {
                         TableFile::get()->query()
@@ -367,6 +381,10 @@ class VideoParser
                     }
                 }
             }
+        }
+
+        if ($isInDb) {
+            throw new Exception($this->curFileShow . " \033[32m已存在\033[0m");
         }
 
         if ($this->options['save']) {
@@ -399,7 +417,7 @@ class VideoParser
             }
         }
 
-        if ($distance >= 60 || $distance <= 4) {
+        if ($distance >= 56 || $distance <= 8) {
             return false;
         }
 

@@ -10,8 +10,14 @@ return [
     'template' => [
         'distance' => [
             'alias' => 'd',
-            'comment' => '相似度判定参数，0-3，数字越大容忍度越高',
-            'default' => 1,
+            'comment' => '相似度判定参数, 0-3, 数字越大容忍度越高',
+            'default' => 2,
+            'paramType' => Option::PARAM_INT,
+        ],
+        'match' => [
+            'alias' => 'm',
+            'comment' => '1-1000, 当两个文件相似度达到该值时会写入到分析结果中',
+            'default' => 50,
             'paramType' => Option::PARAM_INT,
         ],
     ],
@@ -51,7 +57,7 @@ return [
                     'default' => false,
                     'paramType' => Option::PARAM_BOOL,
                 ],
-                'distance',
+                'distance', 'match'
             ]
         ],
         'findimg' => [
