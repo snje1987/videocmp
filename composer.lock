@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minifw/common.git",
-                "reference": "a1d258b45cebfa502201c0090662dfe9dd4118a1"
+                "reference": "8e43642f828497a715d3a9ab2f826d57f62a69f8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minifw/common/zipball/a1d258b45cebfa502201c0090662dfe9dd4118a1",
-                "reference": "a1d258b45cebfa502201c0090662dfe9dd4118a1",
+                "url": "https://api.github.com/repos/minifw/common/zipball/8e43642f828497a715d3a9ab2f826d57f62a69f8",
+                "reference": "8e43642f828497a715d3a9ab2f826d57f62a69f8",
                 "shasum": ""
             },
             "require": {
@@ -63,7 +63,7 @@
                 "issues": "https://github.com/minifw/common/issues",
                 "source": "https://github.com/minifw/common/tree/master"
             },
-            "time": "2022-07-26T11:11:08+00:00"
+            "time": "2022-07-29T03:59:01+00:00"
         },
         {
             "name": "minifw/console",
@@ -71,12 +71,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minifw/console.git",
-                "reference": "6b08b1236cbddbd49ed8f0aeca59e1149b9bd9d8"
+                "reference": "e4dc7c6e285fec38abcf05aed30fa6c8900b7c21"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minifw/console/zipball/6b08b1236cbddbd49ed8f0aeca59e1149b9bd9d8",
-                "reference": "6b08b1236cbddbd49ed8f0aeca59e1149b9bd9d8",
+                "url": "https://api.github.com/repos/minifw/console/zipball/e4dc7c6e285fec38abcf05aed30fa6c8900b7c21",
+                "reference": "e4dc7c6e285fec38abcf05aed30fa6c8900b7c21",
                 "shasum": ""
             },
             "require": {
@@ -123,7 +123,7 @@
                 "issues": "https://github.com/minifw/console/issues",
                 "source": "https://github.com/minifw/console/tree/master"
             },
-            "time": "2022-07-27T07:07:54+00:00"
+            "time": "2022-07-29T08:56:12+00:00"
         },
         {
             "name": "minifw/db",
@@ -131,12 +131,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minifw/db.git",
-                "reference": "5aee3a411a0299a0b29b28e43106bd24d2e31087"
+                "reference": "4a93887154f60388e7eb234edd03e9d7d0ded2b9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minifw/db/zipball/5aee3a411a0299a0b29b28e43106bd24d2e31087",
-                "reference": "5aee3a411a0299a0b29b28e43106bd24d2e31087",
+                "url": "https://api.github.com/repos/minifw/db/zipball/4a93887154f60388e7eb234edd03e9d7d0ded2b9",
+                "reference": "4a93887154f60388e7eb234edd03e9d7d0ded2b9",
                 "shasum": ""
             },
             "require": {
@@ -183,7 +183,7 @@
                 "issues": "https://github.com/minifw/db/issues",
                 "source": "https://github.com/minifw/db/tree/master"
             },
-            "time": "2022-07-27T08:56:31+00:00"
+            "time": "2022-07-29T06:52:26+00:00"
         }
     ],
     "packages-dev": [

@@ -41,7 +41,10 @@ class Config
         $json = file_get_contents($this->path);
         $data = json_decode($json, true);
 
-        $this->mergeConfig($data);
+        if ($data !== null) {
+            $this->mergeConfig($data);
+        }
+
 
         return $this;
     }
@@ -83,7 +86,7 @@ class Config
                 unset($this->data[$name]);
             }
         } elseif (!isset(self::$dataType[$name])) {
-            throw new Exception('参数不合法');
+            throw new Exception('配置项不存在: ' . $name);
         }
 
         switch (self::$dataType[$name]) {
@@ -153,11 +156,9 @@ class Config
     protected string $path;
     protected array $data = [
         'debug' => false,
-        'database' => null,
     ];
     protected static array $dataType = [
         'debug' => self::TYPE_BOOL,
-        'database' => self::TYPE_PATH,
     ];
     const TYPE_BOOL = 1;
     const TYPE_STRING = 2;

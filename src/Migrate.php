@@ -20,6 +20,7 @@
 namespace Org\Snje\Videocmp;
 
 use Minifw\DB\Driver;
+use Org\Snje\Videocmp\Table\Vari;
 
 abstract class Migrate
 {
@@ -35,4 +36,29 @@ abstract class Migrate
     abstract public static function getDBCfg() : array;
 
     abstract public static function getSql() : array;
+
+    public static function applyAll(Driver $driver)
+    {
+        $dataVersion = 0;
+        $tables = $driver->getTables();
+        if (in_array('vari', $tables)) {
+            $system = Vari::get()->getVari('system');
+            $dataVersion = $system['data_version'];
+        }
+
+        while (true) {
+            $classname = __NAMESPACE__ . '\\Migrate\\Migrate_' . $dataVersion;
+            if (!class_exists($classname) || !is_subclass_of($classname, self::class)) {
+                return;
+            }
+
+            App::get()->print('正在迁移数据: migrate_' . $dataVersion);
+
+            $obj = new $classname($driver);
+            $obj->migrate();
+
+            $system = Vari::get()->getVari('system');
+            $dataVersion = $system['data_version'];
+        }
+    }
 }

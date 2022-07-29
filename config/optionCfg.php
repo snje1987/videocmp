@@ -10,8 +10,8 @@ return [
     'template' => [
         'distance' => [
             'alias' => 'd',
-            'comment' => '相似度判定参数，0-7，数字越大容忍度越高',
-            'defalut' => 2,
+            'comment' => '相似度判定参数，0-3，数字越大容忍度越高',
+            'default' => 1,
             'paramType' => Option::PARAM_INT,
         ],
     ],
@@ -33,10 +33,22 @@ return [
         'scan' => [
             'comment' => ['分析指定的目录或文件，在数据库中查找相似的视频，可以同时将该视频的信息记录进数据库'],
             'options' => [
+                'out' => [
+                    'alias' => 'o',
+                    'comment' => '将查找的结果输出到文件',
+                    'default' => null,
+                    'paramType' => Option::PARAM_PATH,
+                ],
                 'save' => [
                     'alias' => 's',
                     'comment' => '在查找的同时把本视频的信息也添加进数据库中',
-                    'defalut' => false,
+                    'default' => false,
+                    'paramType' => Option::PARAM_BOOL,
+                ],
+                'replace' => [
+                    'alias' => 'r',
+                    'comment' => '在添加视频信息时，如果发现被分析的文件在数据库中已经存在，则用新文件的信息替换数据库中的信息',
+                    'default' => false,
                     'paramType' => Option::PARAM_BOOL,
                 ],
                 'distance',
@@ -64,6 +76,14 @@ return [
                     'paramType' => [Option::PARAM_STRING, Option::PARAM_STRING],
                 ],
             ]
+        ],
+        'dump' => [
+            'comment' => '导出视频帧信息',
+            'options' => [
+                'size' => [
+                    'paramType' => Option::PARAM_INT,
+                ],
+            ],
         ],
         'help' => [
             'comment' => '显示本信息',

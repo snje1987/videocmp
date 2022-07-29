@@ -43,6 +43,7 @@ class File extends Table
     ];
     public static array $index = [
         'PRIMARY' => ['fields' => ['id'], 'comment' => '主键'],
-        'file_sha' => ['fields' => ['sha']],
+        'file_sha' => ['fields' => ['sha'], 'unique' => true],
+        'size' => ['fields' => ['size']],
     ];
 }

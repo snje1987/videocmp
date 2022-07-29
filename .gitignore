@@ -2,6 +2,7 @@
 /ttfs/
 /data/
 /tmp/
+/build/
 /config.php
 /vendor-bin/*/*
 !/vendor-bin/*/composer.json

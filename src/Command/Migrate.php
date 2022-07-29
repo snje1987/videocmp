@@ -121,14 +121,7 @@ class Migrate extends Command
 
     protected function doApply(array $options, array $input) : void
     {
-        $system = Vari::get()->getVari('system');
-        $classname = 'Org\\Snje\\Videocmp\\Migrate\\Migrate_' . $system['data_version'];
-        if (!class_exists($classname) || !is_subclass_of($classname, MigrateMigrate::class)) {
-            throw new Exception('迁移工具未找到');
-        }
-
-        $obj = new $classname($this->driver);
-        $obj->migrate();
+        MigrateMigrate::applyAll($this->driver);
     }
 
     protected function doRemove()

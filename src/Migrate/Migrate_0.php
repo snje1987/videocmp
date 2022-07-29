@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) ${year} Yang Ming <yangming0116@163.com>
+ * Copyright (C) 2022 Yang Ming <yangming0116@163.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,18 +26,18 @@ use Minifw\DB\TableInfo;
 use Org\Snje\Videocmp\Migrate as Base;
 use Org\Snje\Videocmp\Table\Vari;
 
-class ${classname} extends Base
+class Migrate_0 extends Base
 {
      public static function getDBCfg() : array
     {
-        $dbJson = file_get_contents(APP_ROOT . '/config/migrate/migrate_${version}_db.json');
+        $dbJson = file_get_contents(APP_ROOT . '/config/migrate/migrate_0_db.json');
 
         return json_decode($dbJson, true);
     }
 
     public static function getSql() : array
     {
-        $sqlJson = file_get_contents(APP_ROOT . '/config/migrate/migrate_${version}_sql.json');
+        $sqlJson = file_get_contents(APP_ROOT . '/config/migrate/migrate_0_sql.json');
 
         return json_decode($sqlJson, true);
     }
@@ -58,7 +58,7 @@ class ${classname} extends Base
                     throw new Exception('数据迁移发生问题');
                 }
             }
-            Vari::get()->setVari('system', ['data_version' => ${version} + 1]);
+            Vari::get()->setVari('system', ['data_version' => 0 + 1]);
             $this->driver->commit();
         } catch (Exception $ex) {
             Utils::printException($ex);

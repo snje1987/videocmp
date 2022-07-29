@@ -40,10 +40,6 @@ class Frame extends Table
         'hash2' => ['type' => 'int', 'comment' => '帧信息2'],
         'hash3' => ['type' => 'int', 'comment' => '帧信息3'],
         'hash4' => ['type' => 'int', 'comment' => '帧信息4'],
-        'hash5' => ['type' => 'int', 'comment' => '帧信息5'],
-        'hash6' => ['type' => 'int', 'comment' => '帧信息6'],
-        'hash7' => ['type' => 'int', 'comment' => '帧信息7'],
-        'hash8' => ['type' => 'int', 'comment' => '帧信息8'],
     ];
     public static array $index = [
         'PRIMARY' => ['fields' => ['id'], 'comment' => '主键'],
@@ -52,9 +48,5 @@ class Frame extends Table
         'frame_hash2' => ['fields' => ['hash2']],
         'frame_hash3' => ['fields' => ['hash3']],
         'frame_hash4' => ['fields' => ['hash4']],
-        'frame_hash5' => ['fields' => ['hash5']],
-        'frame_hash6' => ['fields' => ['hash6']],
-        'frame_hash7' => ['fields' => ['hash7']],
-        'frame_hash8' => ['fields' => ['hash8']],
     ];
 }

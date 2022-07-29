@@ -21,13 +21,11 @@ namespace Org\Snje\Videocmp;
 
 use Minifw\Console\Command as ConsoleCommand;
 use Minifw\DB\Driver;
-use Minifw\DB\Driver\Sqlite3;
-use Minifw\DB\Query;
 
 abstract class Command extends ConsoleCommand
 {
     protected ?Driver $driver = null;
-    protected Config $config;
+    protected App $app;
 
     public static function getConfig() : array
     {
@@ -47,37 +45,22 @@ abstract class Command extends ConsoleCommand
 
     protected function init(array $global)
     {
+        $argv = ['-'];
+
         if (!empty($global['database'])) {
-            $config = [];
-            $config['file'] = $global['database'];
-            $this->driver = new Sqlite3($config);
+            $argv[] = '-db';
+            $argv[] = $global['database'];
         }
 
         if (!empty($global['config'])) {
-            $configPath = $global['config'];
-        } else {
-            $configPath = DATA_DIR . '/config.json';
+            $argv[] = '-c';
+            $argv[] = $global['config'];
         }
 
-        $this->config = new Config($configPath);
-        if ($this->config->get('debug')) {
-            define('DEBUG', 1);
-        } else {
-            define('DEBUG', 0);
-        }
+        $argv[] = 'help';
 
-        if ($this->driver === null) {
-            $database = $this->config->get('database');
-            if (!empty($database)) {
-                $config = [];
-                $config['file'] = $database;
-                $this->driver = new Sqlite3($config);
-            }
-        }
-
-        if (!$this->driver !== null) {
-            Query::setDefaultDriver($this->driver);
-        }
+        $this->app = App::get($argv);
+        $this->driver = $this->app->getDriver();
     }
 
     protected function doHelp() : void

@@ -20,10 +20,13 @@
 namespace Org\Snje\Videocmp;
 
 use Minifw\Common\Exception;
+use Minifw\Common\File as CommonFile;
 use Minifw\Console\Console;
 use Minifw\Console\OptionParser;
+use Minifw\Console\Utils;
 use Minifw\DB\Driver;
 use Minifw\DB\Driver\Sqlite3;
+use Minifw\DB\Query;
 
 class App
 {
@@ -33,10 +36,10 @@ class App
     protected ?Driver $driver = null;
     protected array $options;
     protected array $input;
-    protected string $function;
+    protected string $action;
     protected static ?self $instance = null;
 
-    public static function get($argv) : ?self
+    public static function get(?array $argv = null) : ?self
     {
         if (self::$instance === null) {
             try {
@@ -57,8 +60,6 @@ class App
 
     protected function __construct($argv)
     {
-        $this->console = new Console();
-
         $options = require(APP_ROOT . '/config/optionCfg.php');
         $this->parser = new OptionParser($options);
 
@@ -67,12 +68,7 @@ class App
 
         $this->options = $info['options'];
         $this->input = $info['input'];
-        $action = $info['action'];
-
-        $this->function = 'do' . ucfirst($action);
-        if (!method_exists($this, $this->function)) {
-            throw new Exception('操作不存在');
-        }
+        $this->action = $info['action'];
 
         $this->init($info['global']);
     }
@@ -98,24 +94,41 @@ class App
             define('DEBUG', 0);
         }
 
-        if ($this->driver === null) {
-            $database = $this->config->get('database');
-            if (!empty($database)) {
-                $config = [];
-                $config['file'] = $database;
-                $this->driver = new Sqlite3($config);
-            }
+        if ($this->driver !== null) {
+            Query::setDefaultDriver($this->driver);
+        } elseif ($this->action !== 'help' && $this->action !== 'config' && $this->action !== 'dump') {
+            throw new Exception('必须指定数据库');
         }
+
+        if ($this->action !== 'dump') {
+            $this->console = new Console();
+        }
+
+        set_error_handler(function ($code, $msg, $file, $line) {
+            if (DEBUG) {
+                $msg = '[' . $code . '] ' . $file . '[' . $line . ']: ' . $msg;
+            }
+            $this->console->print($msg);
+        });
     }
 
     public function run() : void
     {
         try {
-            call_user_func([$this, $this->function], $this->options);
+            $function = 'do' . ucfirst($this->action);
+            if (!method_exists($this, $function)) {
+                throw new Exception('操作不存在');
+            }
+
+            if ($this->driver !== null) {
+                Migrate::applyAll($this->driver);
+            }
+
+            call_user_func([$this, $function], $this->options, $this->input);
         } catch (Exception $ex) {
             $msg = $ex->getMessage();
             if (DEBUG) {
-                $msg = $ex->getFile() . '[' . $ex->getLine() . ']: ' . $msg;
+                $msg = '[' . $ex->getCode() . '] ' . $ex->getFile() . '[' . $ex->getLine() . ']: ' . $msg;
             }
 
             $this->console->reset()->print($msg);
@@ -125,6 +138,21 @@ class App
     public function getDriver() : ?Driver
     {
         return $this->driver;
+    }
+
+    public function print($msg) : Console
+    {
+        return $this->console->print($msg);
+    }
+
+    public function setStatus($msg) : Console
+    {
+        return $this->console->setStatus($msg);
+    }
+
+    public function reset() : Console
+    {
+        return $this->console->reset();
     }
 
     /////////////////////////////////////
@@ -145,5 +173,79 @@ class App
     protected function doHelp() : void
     {
         echo $this->parser->getManual() . "\n";
+    }
+
+    protected function doScan(array $options, array $input) : void
+    {
+        $result = [];
+        $out = $options['out'];
+        if (file_exists($out)) {
+            file_put_contents($out, '');
+        }
+
+        $parser = new VideoParser($this);
+        foreach ($input as $path) {
+            if (!file_exists($path)) {
+                throw new Exception('路径不存在: ' . $path);
+            }
+            $path = Utils::getFullPath($path);
+            $file = new CommonFile($path);
+            $file->map(function (CommonFile $file, string $relPath) use ($parser, $options, $out) {
+                if ($options['save']) {
+                    $this->driver->begin();
+                }
+
+                try {
+                    $ret = $parser->parse($file, $relPath, $options);
+                    if (!empty($ret)) {
+                        $ret['src'] = $relPath;
+                        file_put_contents($out, json_encode($ret, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . "\n", FILE_APPEND);
+                    }
+
+                    if ($options['save']) {
+                        $this->driver->commit();
+                    }
+                } catch (Exception $ex) {
+                    if ($options['save']) {
+                        $this->driver->rollback();
+                    }
+                    throw $ex;
+                }
+            });
+        }
+    }
+
+    protected function doDump(array $options) : void
+    {
+        $size = $options['size'];
+        $pixs = $size * $size;
+
+        while (true) {
+            $buffer = fread(STDIN, $pixs);
+            if ($buffer === false || strlen($buffer) != $pixs) {
+                break;
+            }
+
+            $total = 0;
+            $colors = [];
+            for ($i = 0; $i < $pixs; $i++) {
+                $colors[$i] = ord($buffer[$i]);
+                $total += $colors[$i];
+            }
+
+            $avg = (double) $total / $pixs;
+
+            $hashs = '';
+            for ($i = 0; $i < $size; $i++) {
+                $byte = 0;
+                for ($j = 0; $j < $size; $j++) {
+                    if ($colors[$i * $size + $j] > $avg) {
+                        $byte = $byte | (1 << $j);
+                    }
+                }
+                $hashs .= chr($byte);
+            }
+            echo $hashs;
+        }
     }
 }
