@@ -399,8 +399,8 @@ class VideoParser
                     if ($this->options['save'] && $this->options['replace']) {
                         TableFile::get()->query()
                             ->update([
-                                'path' => $this->curFileShow,
-                                'name' => $file->getName()
+                                'path' => ['rich', $this->curFileShow],
+                                'name' => ['rich', $file->getName()]
                             ])
                             ->where(['id' => $one['id']])->exec();
                         $this->curId = $one['id'];
@@ -423,8 +423,8 @@ class VideoParser
             }
 
             $this->curId = TableFile::get()->query()->insert([
-                'path' => $this->curFileShow,
-                'name' => $file->getName(),
+                'path' => ['rich', $this->curFileShow],
+                'name' => ['rich', $file->getName()],
                 'sha' => $sha,
                 'size' => $size,
                 'frames' => 0,
