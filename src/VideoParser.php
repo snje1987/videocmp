@@ -154,8 +154,8 @@ class VideoParser
                     'path' => $info['path'],
                     'match' => $matchFrames,
                     'total' => $info['frames'],
-                    'pecent1' => number_format($pecent1, 2),
-                    'pecent2' => number_format($pecent2, 2),
+                    'pecent1' => number_format($pecent1, 2, '.', ''),
+                    'pecent2' => number_format($pecent2, 2, '.', ''),
                 ];
             }
         }
@@ -276,34 +276,46 @@ class VideoParser
                 'hash3' => $hashs[2],
                 'hash4' => $hashs[3],
             ], true)->all()->exec();
-        } else {
+        } elseif ($this->options['distance'] > 0) {
             $match = Frame::get()->query()->all()->query('select * from `' . Frame::$tbname . '` where (`hash1` = :hash1 and `hash2` = :hash2) or (`hash3` = :hash3 and `hash4` = :hash4)', [
                 'hash1' => $hashs[0],
                 'hash2' => $hashs[1],
                 'hash3' => $hashs[2],
                 'hash4' => $hashs[3],
             ]);
+        } else {
+            $match = Frame::get()->query()->select([])->where([
+                'hash1' => $hashs[0],
+                'hash2' => $hashs[1],
+                'hash3' => $hashs[2],
+                'hash4' => $hashs[3],
+            ], false)->all()->exec();
         }
 
         if (!empty($match)) {
-            $maxDistance = $this->options['distance'];
             $this->counter['selected'] += count($match);
             foreach ($match as $one) {
                 if ($one['file_id'] == $this->curId
                 || (isset($this->matchFrames[$one['file_id']]) && isset($this->matchFrames[$one['file_id']][$one['id']]))) {
                     continue;
                 }
-                $left = [
-                    $one['hash1'], $one['hash2'], $one['hash3'], $one['hash4'],
-                ];
-                $this->counter['match']++;
-                if (self::withinDistance($left, $hashs, $maxDistance)) {
-                    $list[] = $one['file_id'];
-                    if (!isset($this->matchFrames[$one['file_id']])) {
-                        $this->matchFrames[$one['file_id']] = [];
+
+                if ($this->options['distance'] > 0) {
+                    $this->counter['match']++;
+
+                    $left = [
+                        $one['hash1'], $one['hash2'], $one['hash3'], $one['hash4'],
+                    ];
+                    if (!self::withinDistance($left, $hashs, $this->options['distance'])) {
+                        continue;
                     }
-                    $this->matchFrames[$one['file_id']][$one['id']] = 1;
                 }
+
+                if (!isset($this->matchFrames[$one['file_id']])) {
+                    $this->matchFrames[$one['file_id']] = [];
+                }
+
+                $this->matchFrames[$one['file_id']][$one['id']] = 1;
             }
         }
     }
@@ -434,7 +446,7 @@ class VideoParser
         return null;
     }
 
-    public static function checkFrame(array $hash)
+    public static function checkFrame(array $hash) : bool
     {
         $distance = 0;
         for ($i = 0; $i < 4; $i++) {
@@ -474,6 +486,54 @@ class VideoParser
         return true;
     }
 
+    public static function buildHashCache(int $max) : array
+    {
+        if ($max <= 0) {
+            return [];
+        }
+
+        $ret = [];
+        for ($i = $max;$i > 0;$i--) {
+            $sub = self::buildHashLen($i, 0);
+            foreach ($sub as $num => $val) {
+                $ret[$num] = 1;
+            }
+        }
+
+        $ret[0] = 1;
+
+        return $ret;
+    }
+
+    public static function buildHashLen(int $len, int $begin) : array
+    {
+        if ($len <= 0 || $begin >= self::HASH_LEN - $len + 1) {
+            return [];
+        }
+
+        if ($len <= 1) {
+            $ret = [];
+            for ($i = $begin; $i < self::HASH_LEN; $i++) {
+                $ret[1 << $i] = 1;
+            }
+
+            return $ret;
+        }
+
+        $ret = [];
+        for ($i = $begin; $i < self::HASH_LEN; $i++) {
+            $prefix = 1 << $i;
+            $subs = self::buildHashLen($len - 1, $i + 1);
+            if (!empty($subs)) {
+                foreach ($subs as $sub => $val) {
+                    $ret[$sub | $prefix] = 1;
+                }
+            }
+        }
+
+        return $ret;
+    }
+
     public static function isVideo(string $filename) : bool
     {
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
@@ -505,8 +565,10 @@ class VideoParser
     protected array $matchFrames = [];
     protected array $options;
     protected array $counter = [];
+    protected array $hashCache = [];
     protected string $msgCache = '';
     const FRAME_SIZE = 8;
+    const HASH_LEN = 64;
     const FRAME_STEP = 25;
 
     public function __construct(App $app)
