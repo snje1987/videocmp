@@ -261,7 +261,8 @@ class VideoParser
         if (!empty($match)) {
             $maxDistance = $this->options['distance'];
             foreach ($match as $one) {
-                if ($one['file_id'] == $this->curId) {
+                if ($one['file_id'] == $this->curId
+                || (isset($this->matchFrames[$one['file_id']]) && isset($this->matchFrames[$one['file_id']][$one['id']]))) {
                     continue;
                 }
                 $left = [
