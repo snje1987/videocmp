@@ -11,7 +11,7 @@ return [
         'distance' => [
             'alias' => 'd',
             'comment' => '相似度判定参数, 0-3, 数字越大容忍度越高',
-            'default' => 2,
+            'default' => 1,
             'paramType' => Option::PARAM_INT,
         ],
         'match' => [

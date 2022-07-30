@@ -47,6 +47,11 @@ class VideoParser
             $this->frameTotal = 0;
             $this->frameSaved = 0;
             $this->frameDelay = 0;
+            $this->msgCache = '';
+            $this->counter = [
+                'selected' => 0,
+                'match' => 0,
+            ];
 
             if (!self::isVideo($this->curFilePath)) {
                 throw new Exception($this->curFileShow . " \033[32m跳过\033[0m");
@@ -165,6 +170,17 @@ class VideoParser
         return null;
     }
 
+    protected function setStatus(string $msg = null)
+    {
+        if ($msg === null) {
+            $msg = $this->msgCache;
+        } else {
+            $this->msgCache = $msg;
+        }
+        $msg = '[' . $this->frameSaved . '/' . $this->frameTotal . '] [' . Utils::showSize($this->counter['match']) . '/' . Utils::showSize($this->counter['selected']) . '] ' . $msg;
+        $this->app->setStatus($msg);
+    }
+
     protected function dumpVideo(array $videoInfo) : void
     {
         $phar = __FILE__;
@@ -205,7 +221,8 @@ class VideoParser
                         $pecent = round($sec * 100 / $videoInfo['duration'], 2);
 
                         $line = 'frame=' . $matches[1] . ' fps=' . $matches[2] . ' time=' . $matches[3] . ':' . $matches[4] . ':' . $matches[5] . '/' . $total . ' ' . $pecent . '%';
-                        $this->app->setStatus($line);
+
+                        $this->setStatus($line);
                     }
                 }
             }
@@ -229,6 +246,7 @@ class VideoParser
             if ($this->options['save']) {
                 if ($this->frameTotal % self::FRAME_STEP == 0) {
                     $this->frameDelay++;
+                    $this->setStatus();
                 }
                 if ($this->frameDelay > 0) {
                     if (!self::checkFrame($hashs)) {
@@ -251,15 +269,25 @@ class VideoParser
 
     protected function matchHash($hashs) : void
     {
-        $match = Frame::get()->query()->select([])->where([
-            'hash1' => $hashs[0],
-            'hash2' => $hashs[1],
-            'hash3' => $hashs[2],
-            'hash4' => $hashs[3],
-        ], true)->all()->exec();
+        if ($this->options['distance'] > 1) {
+            $match = Frame::get()->query()->select([])->where([
+                'hash1' => $hashs[0],
+                'hash2' => $hashs[1],
+                'hash3' => $hashs[2],
+                'hash4' => $hashs[3],
+            ], true)->all()->exec();
+        } else {
+            $match = Frame::get()->query()->all()->query('select * from `' . Frame::$tbname . '` where (`hash1` = :hash1 and `hash2` = :hash2) or (`hash3` = :hash3 and `hash4` = :hash4)', [
+                'hash1' => $hashs[0],
+                'hash2' => $hashs[1],
+                'hash3' => $hashs[2],
+                'hash4' => $hashs[3],
+            ]);
+        }
 
         if (!empty($match)) {
             $maxDistance = $this->options['distance'];
+            $this->counter['selected'] += count($match);
             foreach ($match as $one) {
                 if ($one['file_id'] == $this->curId
                 || (isset($this->matchFrames[$one['file_id']]) && isset($this->matchFrames[$one['file_id']][$one['id']]))) {
@@ -268,6 +296,7 @@ class VideoParser
                 $left = [
                     $one['hash1'], $one['hash2'], $one['hash3'], $one['hash4'],
                 ];
+                $this->counter['match']++;
                 if (self::withinDistance($left, $hashs, $maxDistance)) {
                     $list[] = $one['file_id'];
                     if (!isset($this->matchFrames[$one['file_id']])) {
@@ -475,6 +504,8 @@ class VideoParser
     protected int $curId = 0;
     protected array $matchFrames = [];
     protected array $options;
+    protected array $counter = [];
+    protected string $msgCache = '';
     const FRAME_SIZE = 8;
     const FRAME_STEP = 25;
 
