@@ -12,13 +12,13 @@ return [
             'alias' => 'd',
             'comment' => '相似度判定参数, 0-3, 数字越大容忍度越高',
             'default' => 1,
-            'paramType' => Option::PARAM_INT,
+            'type' => Option::PARAM_INT,
         ],
         'match' => [
             'alias' => 'm',
             'comment' => '1-1000, 当两个文件相似度达到该值时会写入到分析结果中',
             'default' => 50,
-            'paramType' => Option::PARAM_INT,
+            'type' => Option::PARAM_INT,
         ],
     ],
     'global' => [
@@ -26,13 +26,13 @@ return [
             'alias' => ['db'],
             'comment' => '数据库文件的位置',
             'default' => '',
-            'paramType' => Option::PARAM_PATH
+            'type' => Option::PARAM_PATH
         ],
         'config' => [
             'alias' => ['c'],
             'comment' => '配置文件的路径，默认为用户主目录下的 `.videocmp/config.json`',
             'default' => '',
-            'paramType' => Option::PARAM_PATH
+            'type' => Option::PARAM_PATH
         ],
     ],
     'actions' => [
@@ -43,19 +43,28 @@ return [
                     'alias' => 'o',
                     'comment' => '将查找的结果输出到文件',
                     'default' => null,
-                    'paramType' => Option::PARAM_PATH,
+                    'type' => Option::PARAM_PATH,
                 ],
                 'save' => [
                     'alias' => 's',
                     'comment' => '在查找的同时把本视频的信息也添加进数据库中',
                     'default' => false,
-                    'paramType' => Option::PARAM_BOOL,
+                    'type' => Option::PARAM_BOOL,
                 ],
-                'replace' => [
-                    'alias' => 'r',
+                'override' => [
                     'comment' => '在添加视频信息时，如果发现被分析的文件在数据库中已经存在，则用新文件的信息替换数据库中的信息',
                     'default' => false,
-                    'paramType' => Option::PARAM_BOOL,
+                    'type' => Option::PARAM_BOOL,
+                ],
+                'rescan' => [
+                    'comment' => '重新分析已经在数据库中的文件',
+                    'default' => false,
+                    'type' => Option::PARAM_BOOL,
+                ],
+                'rescan-override' => [
+                    'comment' => '重新分析新替换到数据库中的文件',
+                    'default' => false,
+                    'type' => Option::PARAM_BOOL,
                 ],
                 'distance', 'match'
             ]
@@ -73,13 +82,13 @@ return [
                     'alias' => 'g',
                     'comment' => '查询配置项',
                     'default' => [],
-                    'paramType' => Option::PARAM_STRING,
+                    'type' => Option::PARAM_STRING,
                 ],
                 'set' => [
                     'alias' => 's',
                     'comment' => '修改配置项',
                     'default' => [],
-                    'paramType' => [Option::PARAM_STRING, Option::PARAM_STRING],
+                    'type' => [Option::PARAM_STRING, Option::PARAM_STRING],
                 ],
             ]
         ],
@@ -87,7 +96,7 @@ return [
             'comment' => '导出视频帧信息',
             'options' => [
                 'size' => [
-                    'paramType' => Option::PARAM_INT,
+                    'type' => Option::PARAM_INT,
                 ],
             ],
         ],

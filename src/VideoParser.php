@@ -52,6 +52,7 @@ class VideoParser
                 'selected' => 0,
                 'match' => 0,
             ];
+            $this->hashLen = self::buildHashLen($this->options['distance']);
 
             if (!self::isVideo($this->curFilePath)) {
                 throw new Exception($this->curFileShow . " \033[32m跳过\033[0m");
@@ -62,15 +63,37 @@ class VideoParser
 
             $this->app->setStatus('获取文件信息...');
             $dbFile = $this->findFile($file, $size);
+
             if ($dbFile !== null) {
-                if ($this->curId > 0) {
-                    return [
-                        'replace' => $dbFile['path'],
-                    ];
+                if ($dbFile['path'] == $this->curFileShow) {
+                    if (!$this->options['rescan']) {
+                        return null;
+                    }
                 } else {
-                    return [
-                        'same' => $dbFile['path'],
-                    ];
+                    if ($this->options['save'] && $this->options['override']) {
+                        TableFile::get()->query()
+                            ->update([
+                                'path' => ['rich', $this->curFileShow],
+                                'name' => ['rich', $file->getName()]
+                            ])
+                            ->where(['id' => $dbFile['id']])->exec();
+
+                        if (!$this->options['rescan-override']) {
+                            return [
+                                'replace' => $dbFile['path'],
+                            ];
+                        }
+                    } else {
+                        return [
+                            'same' => $dbFile['path'],
+                        ];
+                    }
+                }
+
+                $this->curId = $dbFile['id'];
+
+                if ($this->options['save']) {
+                    Frame::get()->query()->delete()->where(['file_id' => $this->curId])->exec();
                 }
             }
 
@@ -90,7 +113,7 @@ class VideoParser
             $this->app->setStatus('开始分析视频: ' . $this->curFileShow);
             $this->dumpVideo($videoInfo);
 
-            if ($this->curId > 0) {
+            if ($this->options['save'] && $this->curId > 0) {
                 TableFile::get()->query()->update([
                     'frames' => $this->frameSaved,
                 ])->where(['id' => $this->curId])->exec();
@@ -243,11 +266,14 @@ class VideoParser
             $this->buffer = substr($this->buffer, 8);
             $this->matchHash($hashs);
 
-            if ($this->options['save']) {
-                if ($this->frameTotal % self::FRAME_STEP == 0) {
+            if ($this->frameTotal % self::FRAME_STEP == 0) {
+                if ($this->options['save']) {
                     $this->frameDelay++;
-                    $this->setStatus();
                 }
+                $this->setStatus();
+            }
+
+            if ($this->options['save']) {
                 if ($this->frameDelay > 0) {
                     if (!self::checkFrame($hashs)) {
                         continue;
@@ -306,7 +332,7 @@ class VideoParser
                     $left = [
                         $one['hash1'], $one['hash2'], $one['hash3'], $one['hash4'],
                     ];
-                    if (!self::withinDistance($left, $hashs, $this->options['distance'])) {
+                    if (!$this->withinDistance($left, $hashs, $this->options['distance'])) {
                         continue;
                     }
                 }
@@ -397,36 +423,18 @@ class VideoParser
             ->where(['size' => $size])->all()->exec();
 
         $sha = null;
-        $isInDb = false;
         if (!empty($dbFile)) {
             foreach ($dbFile as $one) {
                 if ($one['path'] == $this->curFileShow) {
-                    $isInDb = true;
-                    continue;
+                    return $one;
                 }
                 if ($sha === null) {
                     $sha = sha1_file($file->getFsPath(), false);
                 }
                 if ($sha === $one['sha']) {
-                    if ($this->options['save'] && $this->options['replace']) {
-                        TableFile::get()->query()
-                            ->update([
-                                'path' => ['rich', $this->curFileShow],
-                                'name' => ['rich', $file->getName()]
-                            ])
-                            ->where(['id' => $one['id']])->exec();
-                        $this->curId = $one['id'];
-
-                        return $one;
-                    } else {
-                        return $one;
-                    }
+                    return $one;
                 }
             }
-        }
-
-        if ($isInDb) {
-            throw new Exception($this->curFileShow . " \033[32m已存在\033[0m");
         }
 
         if ($this->options['save']) {
@@ -466,46 +474,44 @@ class VideoParser
         return true;
     }
 
-    public static function withinDistance(array $hash1, array $hash2, int $max)
+    public function withinDistance(array $hash1, array $hash2, int $max)
     {
         $distance = 0;
         for ($i = 0; $i < 4; $i++) {
             $match = ($hash1[$i] ^ $hash2[$i]);
+            if (!isset($this->hashLen[$match])) {
+                return false;
+            }
 
-            for ($j = 0; $j < 16; $j++) {
-                if (($match & 1) == 1) {
-                    $distance++;
-                    if ($distance > $max) {
-                        return false;
-                    }
-                }
-                $match = $match >> 1;
+            $distance += $this->hashLen[$match];
+            if ($distance > $max) {
+                return false;
             }
         }
 
         return true;
     }
 
-    public static function buildHashCache(int $max) : array
+    public static function buildHashLen(int $max) : array
     {
         if ($max <= 0) {
             return [];
         }
 
         $ret = [];
-        for ($i = $max;$i > 0;$i--) {
-            $sub = self::buildHashLen($i, 0);
+        for ($i = $max; $i > 0; $i--) {
+            $sub = self::buildHash($i, 0);
             foreach ($sub as $num => $val) {
-                $ret[$num] = 1;
+                $ret[$num] = $i;
             }
         }
 
-        $ret[0] = 1;
+        $ret[0] = 0;
 
         return $ret;
     }
 
-    public static function buildHashLen(int $len, int $begin) : array
+    public static function buildHash(int $len, int $begin) : array
     {
         if ($len <= 0 || $begin >= self::HASH_LEN - $len + 1) {
             return [];
@@ -565,15 +571,18 @@ class VideoParser
     protected array $matchFrames = [];
     protected array $options;
     protected array $counter = [];
-    protected array $hashCache = [];
+    protected array $hashLen = [];
     protected string $msgCache = '';
     const FRAME_SIZE = 8;
-    const HASH_LEN = 64;
+    const HASH_LEN = 16;
     const FRAME_STEP = 25;
 
-    public function __construct(App $app)
+    public function __construct(?App $app, ?int $distance = 0)
     {
         $this->app = $app;
+        if ($distance > 0) {
+            $this->hashLen = self::buildHashLen($distance);
+        }
     }
-    protected App $app;
+    protected ?App $app;
 }

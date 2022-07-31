@@ -35,7 +35,7 @@ class System extends Command
                         'alias' => 'a',
                         'comment' => '是否把修改应用到数据库中',
                         'default' => false,
-                        'paramType' => Option::PARAM_BOOL
+                        'type' => Option::PARAM_BOOL
                     ]
                 ]
             ]

@@ -50,8 +50,10 @@ $input = [
     ],
 ];
 
+$obj = new VideoParser(null, 2);
+
 foreach ($input as $values) {
-    $ret = VideoParser::withinDistance($values[0], $values[1], $values[2]);
+    $ret = $obj->withinDistance($values[0], $values[1], $values[2]);
     var_dump($ret);
 }
 ?>

@@ -71,12 +71,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minifw/console.git",
-                "reference": "e4dc7c6e285fec38abcf05aed30fa6c8900b7c21"
+                "reference": "dd76078fbd79da26d4753a3c9caace9aa334ef12"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minifw/console/zipball/e4dc7c6e285fec38abcf05aed30fa6c8900b7c21",
-                "reference": "e4dc7c6e285fec38abcf05aed30fa6c8900b7c21",
+                "url": "https://api.github.com/repos/minifw/console/zipball/dd76078fbd79da26d4753a3c9caace9aa334ef12",
+                "reference": "dd76078fbd79da26d4753a3c9caace9aa334ef12",
                 "shasum": ""
             },
             "require": {
@@ -123,7 +123,7 @@
                 "issues": "https://github.com/minifw/console/issues",
                 "source": "https://github.com/minifw/console/tree/master"
             },
-            "time": "2022-07-29T08:56:12+00:00"
+            "time": "2022-07-31T06:33:31+00:00"
         },
         {
             "name": "minifw/db",

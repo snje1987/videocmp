@@ -180,7 +180,7 @@ class App
         $result = [];
         $out = $options['out'];
 
-        $parser = new VideoParser($this);
+        $parser = new VideoParser($this, $options['distance']);
         foreach ($input as $path) {
             if (!file_exists($path)) {
                 throw new Exception('路径不存在: ' . $path);
