@@ -29,7 +29,7 @@ use Phar;
 
 class VideoParser
 {
-    public function parse(File $file, string $pathShow, array $options)
+    public function parse(File $file, array $options)
     {
         if ($options['match'] < 1 || $options['match'] > 1000) {
             throw new Exception('选项参数不合法: --match');
@@ -39,7 +39,6 @@ class VideoParser
         }
         try {
             $this->curFilePath = $file->getFsPath();
-            $this->curFileShow = $pathShow;
             $this->curId = 0;
             $this->matchFrames = [];
             $this->options = $options;
@@ -55,17 +54,17 @@ class VideoParser
             $this->hashLen = self::buildHashLen($this->options['distance']);
 
             if (!self::isVideo($this->curFilePath)) {
-                throw new Exception($this->curFileShow . " \033[32m跳过\033[0m");
+                throw new Exception($this->curFilePath . " \033[32m跳过\033[0m");
             }
 
             $size = filesize($this->curFilePath);
-            $this->app->print($this->curFileShow . " \033[32m" . Utils::showSize($size) . "\033[0m");
+            $this->app->print($this->curFilePath . " \033[32m" . Utils::showSize($size) . "\033[0m");
 
             $this->app->setStatus('获取文件信息...');
             $dbFile = $this->findFile($file, $size);
 
             if ($dbFile !== null) {
-                if ($dbFile['path'] == $this->curFileShow) {
+                if ($dbFile['path'] == $this->curFilePath) {
                     if (!$this->options['rescan']) {
                         return null;
                     }
@@ -73,7 +72,7 @@ class VideoParser
                     if ($this->options['save'] && $this->options['override']) {
                         TableFile::get()->query()
                             ->update([
-                                'path' => ['rich', $this->curFileShow],
+                                'path' => ['rich', $this->curFilePath],
                                 'name' => ['rich', $file->getName()]
                             ])
                             ->where(['id' => $dbFile['id']])->exec();
@@ -110,7 +109,7 @@ class VideoParser
             $videoInfo['crop_str'] = ($videoInfo['crop'][1] - $videoInfo['crop'][0] + 1) . ':' . ($videoInfo['crop'][3] - $videoInfo['crop'][2] + 1) . ':' . $videoInfo['crop'][0] . ':' . $videoInfo['crop'][2];
             $this->app->print("视频边界: \033[32m" . $videoInfo['crop_str'] . "\033[0m");
 
-            $this->app->setStatus('开始分析视频: ' . $this->curFileShow);
+            $this->app->setStatus('开始分析视频: ' . $this->curFilePath);
             $this->dumpVideo($videoInfo);
 
             if ($this->options['save'] && $this->curId > 0) {
@@ -383,7 +382,7 @@ class VideoParser
         }
 
         if ($crop === null) {
-            throw new Exception('获取视频边界失败:' . $this->curFileShow);
+            throw new Exception('获取视频边界失败:' . $this->curFilePath);
         }
 
         return $crop;
@@ -395,7 +394,7 @@ class VideoParser
         $json = (new Process($cmd))->exec(1, $exitcode);
         $basic = json_decode($json, true);
         if (empty($basic || empty($info['streams']))) {
-            throw new Exception('不是视频文件：' . $this->curFileShow);
+            throw new Exception('不是视频文件：' . $this->curFilePath);
         }
 
         $duration = 0;
@@ -410,7 +409,7 @@ class VideoParser
         }
 
         if ($duration <= 1) {
-            throw new Exception('不是视频文件：' . $this->curFileShow);
+            throw new Exception('不是视频文件：' . $this->curFilePath);
         }
 
         return $duration;
@@ -425,11 +424,11 @@ class VideoParser
         $sha = null;
         if (!empty($dbFile)) {
             foreach ($dbFile as $one) {
-                if ($one['path'] == $this->curFileShow) {
+                if ($one['name'] == $file->getName()) {
                     return $one;
                 }
                 if ($sha === null) {
-                    $sha = sha1_file($file->getFsPath(), false);
+                    $sha = sha1_file($this->curFilePath, false);
                 }
                 if ($sha === $one['sha']) {
                     return $one;
@@ -439,11 +438,11 @@ class VideoParser
 
         if ($this->options['save']) {
             if ($sha === null) {
-                $sha = sha1_file($file->getFsPath(), false);
+                $sha = sha1_file($this->curFilePath, false);
             }
 
             $this->curId = TableFile::get()->query()->insert([
-                'path' => ['rich', $this->curFileShow],
+                'path' => ['rich', $this->curFilePath],
                 'name' => ['rich', $file->getName()],
                 'sha' => $sha,
                 'size' => $size,
@@ -562,7 +561,6 @@ class VideoParser
     ////////////////////////////////////////////////
 
     protected string $curFilePath;
-    protected string $curFileShow;
     protected string $buffer = '';
     protected int $frameTotal = 0;
     protected int $frameSaved = 0;

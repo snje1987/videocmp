@@ -69,10 +69,15 @@ return [
                 'distance', 'match'
             ]
         ],
-        'findimg' => [
-            'comment' => ['查找指定图片是否出现在数据库中的视频内'],
+        'missing' => [
+            'comment' => ['查找已经被从文件系统中删除的数据库中的文件'],
             'options' => [
-                'distance',
+                'save' => [
+                    'alias' => 's',
+                    'comment' => '删除数据库中对应的信息',
+                    'default' => false,
+                    'type' => Option::PARAM_BOOL,
+                ],
             ]
         ],
         'config' => [

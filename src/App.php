@@ -27,6 +27,8 @@ use Minifw\Console\Utils;
 use Minifw\DB\Driver;
 use Minifw\DB\Driver\Sqlite3;
 use Minifw\DB\Query;
+use Org\Snje\Videocmp\Table\File;
+use Org\Snje\Videocmp\Table\Frame;
 
 class App
 {
@@ -193,13 +195,13 @@ class App
                 }
 
                 try {
-                    $ret = $parser->parse($file, $relPath, $options);
+                    $ret = $parser->parse($file, $options);
                     if (!empty($ret)) {
                         $lines = [];
                         if (isset($ret['total'])) {
-                            $lines[] = '[' . $ret['total'] . '] ' . $relPath;
+                            $lines[] = '[' . $ret['total'] . '] ' . $file->getFsPath();
                         } else {
-                            $lines[] = $relPath;
+                            $lines[] = $file->getFsPath();
                         }
                         if (isset($ret['same'])) {
                             $lines[] = '相同文件: ' . $ret['same'];
@@ -267,5 +269,28 @@ class App
             }
             echo $hashs;
         }
+    }
+
+    protected function doMissing(array $options, array $input) : void
+    {
+        File::get()->query()->all()->map(function ($data) use ($options) {
+            $path = $data['path'];
+            if (!file_exists($path)) {
+                $this->print($data['path']);
+                if ($options['save']) {
+                    try {
+                        $this->driver->begin();
+
+                        File::get()->query()->delete()->where(['id' => $data['id']])->exec();
+                        Frame::get()->query()->delete()->where(['file_id' => $data['id']])->exec();
+
+                        $this->driver->commit();
+                    } catch (Exception $ex) {
+                        $this->driver->rollback();
+                        throw $ex;
+                    }
+                }
+            }
+        });
     }
 }
