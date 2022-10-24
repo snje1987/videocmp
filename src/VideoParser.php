@@ -365,7 +365,7 @@ class VideoParser
 
         foreach ($ss_list as $ss) {
             $cmd = 'ffmpeg -ss ' . $ss . ' -i "' . $this->curFilePath . '" -vframes 10 -vf cropdetect -f null - 2>&1 | grep \'cropdetect\'';
-            $result = (new Process($cmd))->exec(1, $exitCode);
+            $result = (new Process($cmd))->exec(1);
             $result = explode("\n", $result);
             foreach ($result as $v) {
                 if (preg_match('/x1:(\\d+) x2:(\\d+) y1:(\\d+) y2:(\\d+) w:(\\d+) h:(\\d+)/', $v, $matches)) {
@@ -391,7 +391,7 @@ class VideoParser
     protected function getDuration() : int
     {
         $cmd = 'ffprobe -v quiet -print_format json -show_streams "' . $this->curFilePath . '"';
-        $json = (new Process($cmd))->exec(1, $exitcode);
+        $json = (new Process($cmd))->exec(1);
         $basic = json_decode($json, true);
         if (empty($basic || empty($info['streams']))) {
             throw new Exception('不是视频文件：' . $this->curFilePath);
