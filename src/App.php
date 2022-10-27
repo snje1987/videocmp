@@ -233,7 +233,7 @@ class App
                     }
                     throw $ex;
                 }
-            });
+            }, true, '', CommonFile::LOOP_TARGET_FILE);
         }
     }
 

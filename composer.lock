@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minifw/common.git",
-                "reference": "99cd9fcabe2de35a42f0aca1dfb70e4cc8833b99"
+                "reference": "fca44e3b35ae58e8001cea9191eb1d1accc91ebe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minifw/common/zipball/99cd9fcabe2de35a42f0aca1dfb70e4cc8833b99",
-                "reference": "99cd9fcabe2de35a42f0aca1dfb70e4cc8833b99",
+                "url": "https://api.github.com/repos/minifw/common/zipball/fca44e3b35ae58e8001cea9191eb1d1accc91ebe",
+                "reference": "fca44e3b35ae58e8001cea9191eb1d1accc91ebe",
                 "shasum": ""
             },
             "require": {
@@ -63,7 +63,7 @@
                 "issues": "https://github.com/minifw/common/issues",
                 "source": "https://github.com/minifw/common/tree/master"
             },
-            "time": "2022-10-25T23:49:30+00:00"
+            "time": "2022-10-27T23:36:32+00:00"
         },
         {
             "name": "minifw/console",
@@ -71,12 +71,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minifw/console.git",
-                "reference": "fabab47d592ee153dce23b7ca82832bf334c55ee"
+                "reference": "4f51b9c54b807ff4383d7ecef3b51d4a863cb954"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minifw/console/zipball/fabab47d592ee153dce23b7ca82832bf334c55ee",
-                "reference": "fabab47d592ee153dce23b7ca82832bf334c55ee",
+                "url": "https://api.github.com/repos/minifw/console/zipball/4f51b9c54b807ff4383d7ecef3b51d4a863cb954",
+                "reference": "4f51b9c54b807ff4383d7ecef3b51d4a863cb954",
                 "shasum": ""
             },
             "require": {
@@ -123,7 +123,7 @@
                 "issues": "https://github.com/minifw/console/issues",
                 "source": "https://github.com/minifw/console/tree/master"
             },
-            "time": "2022-10-25T23:51:01+00:00"
+            "time": "2022-10-26T03:28:35+00:00"
         },
         {
             "name": "minifw/db",
