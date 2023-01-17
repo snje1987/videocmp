@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minifw/common.git",
-                "reference": "fca44e3b35ae58e8001cea9191eb1d1accc91ebe"
+                "reference": "cf7437f3cc9dd30c6a39776e4cdc794636f5c168"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minifw/common/zipball/fca44e3b35ae58e8001cea9191eb1d1accc91ebe",
-                "reference": "fca44e3b35ae58e8001cea9191eb1d1accc91ebe",
+                "url": "https://api.github.com/repos/minifw/common/zipball/cf7437f3cc9dd30c6a39776e4cdc794636f5c168",
+                "reference": "cf7437f3cc9dd30c6a39776e4cdc794636f5c168",
                 "shasum": ""
             },
             "require": {
@@ -63,7 +63,7 @@
                 "issues": "https://github.com/minifw/common/issues",
                 "source": "https://github.com/minifw/common/tree/master"
             },
-            "time": "2022-10-27T23:36:32+00:00"
+            "time": "2023-01-17T09:08:38+00:00"
         },
         {
             "name": "minifw/console",
@@ -71,12 +71,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minifw/console.git",
-                "reference": "4f51b9c54b807ff4383d7ecef3b51d4a863cb954"
+                "reference": "5b811d7df00fb6aaa4626abc4b8d0f1d6e5ce5e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minifw/console/zipball/4f51b9c54b807ff4383d7ecef3b51d4a863cb954",
-                "reference": "4f51b9c54b807ff4383d7ecef3b51d4a863cb954",
+                "url": "https://api.github.com/repos/minifw/console/zipball/5b811d7df00fb6aaa4626abc4b8d0f1d6e5ce5e0",
+                "reference": "5b811d7df00fb6aaa4626abc4b8d0f1d6e5ce5e0",
                 "shasum": ""
             },
             "require": {
@@ -123,7 +123,7 @@
                 "issues": "https://github.com/minifw/console/issues",
                 "source": "https://github.com/minifw/console/tree/master"
             },
-            "time": "2022-10-26T03:28:35+00:00"
+            "time": "2023-01-17T09:09:24+00:00"
         },
         {
             "name": "minifw/db",
@@ -131,12 +131,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/minifw/db.git",
-                "reference": "59377b70fd9b38977ad34e64eea5db42ad505705"
+                "reference": "1ecc302a4edd2f24028bbc4e2247061b330661ca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/minifw/db/zipball/59377b70fd9b38977ad34e64eea5db42ad505705",
-                "reference": "59377b70fd9b38977ad34e64eea5db42ad505705",
+                "url": "https://api.github.com/repos/minifw/db/zipball/1ecc302a4edd2f24028bbc4e2247061b330661ca",
+                "reference": "1ecc302a4edd2f24028bbc4e2247061b330661ca",
                 "shasum": ""
             },
             "require": {
@@ -183,22 +183,22 @@
                 "issues": "https://github.com/minifw/db/issues",
                 "source": "https://github.com/minifw/db/tree/master"
             },
-            "time": "2022-10-25T23:50:25+00:00"
+            "time": "2023-01-17T09:10:10+00:00"
         }
     ],
     "packages-dev": [
         {
             "name": "bamarni/composer-bin-plugin",
-            "version": "1.8.1",
+            "version": "1.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bamarni/composer-bin-plugin.git",
-                "reference": "e12e9769c8ee97d036f7f98abf66b96cf3862346"
+                "reference": "92fd7b1e6e9cdae19b0d57369d8ad31a37b6a880"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bamarni/composer-bin-plugin/zipball/e12e9769c8ee97d036f7f98abf66b96cf3862346",
-                "reference": "e12e9769c8ee97d036f7f98abf66b96cf3862346",
+                "url": "https://api.github.com/repos/bamarni/composer-bin-plugin/zipball/92fd7b1e6e9cdae19b0d57369d8ad31a37b6a880",
+                "reference": "92fd7b1e6e9cdae19b0d57369d8ad31a37b6a880",
                 "shasum": ""
             },
             "require": {
@@ -240,9 +240,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bamarni/composer-bin-plugin/issues",
-                "source": "https://github.com/bamarni/composer-bin-plugin/tree/1.8.1"
+                "source": "https://github.com/bamarni/composer-bin-plugin/tree/1.8.2"
             },
-            "time": "2022-08-03T19:58:11+00:00"
+            "time": "2022-10-31T08:38:03+00:00"
         }
     ],
     "aliases": [],
