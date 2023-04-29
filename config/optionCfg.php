@@ -80,6 +80,23 @@ return [
                 ],
             ]
         ],
+        'crop' => [
+            'comment' => ['自动裁减视频'],
+            'options' => [
+                'aspect' => [
+                    'alias' => 'a',
+                    'comment' => '视频比例',
+                    'default' => '',
+                    'type' => Option::PARAM_STRING,
+                ],
+                'out' => [
+                    'alias' => 'o',
+                    'comment' => '结果保存路径，为空则不保存',
+                    'default' => '',
+                    'type' => Option::PARAM_PATH,
+                ],
+            ]
+        ],
         'config' => [
             'comment' => ['修改或查询程序的各项配置'],
             'options' => [

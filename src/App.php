@@ -21,8 +21,11 @@ namespace Org\Snje\Videocmp;
 
 use Minifw\Common\Exception;
 use Minifw\Common\File as CommonFile;
+use Minifw\Common\FileUtils;
+use Minifw\Common\Utils as CommonUtils;
 use Minifw\Console\Console;
 use Minifw\Console\OptionParser;
+use Minifw\Console\Process;
 use Minifw\Console\Utils;
 use Minifw\DB\Driver;
 use Minifw\DB\Driver\Sqlite3;
@@ -96,9 +99,12 @@ class App
             define('DEBUG', 0);
         }
 
+        $needdb = ['scan', 'missing'];
+
         if ($this->driver !== null) {
             Query::setDefaultDriver($this->driver);
-        } elseif ($this->action !== 'help' && $this->action !== 'config' && $this->action !== 'dump') {
+            $this->driver->exec('PRAGMA synchronous = OFF');
+        } elseif (in_array($this->action, $needdb)) {
             throw new Exception('必须指定数据库');
         }
 
@@ -144,6 +150,10 @@ class App
 
     public function print($msg) : Console
     {
+        if (is_array($msg) || is_object($msg)) {
+            $msg = json_encode($msg, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
         return $this->console->print($msg);
     }
 
@@ -233,7 +243,7 @@ class App
                     }
                     throw $ex;
                 }
-            }, true, '', CommonFile::LOOP_TARGET_FILE);
+            }, '', true, 0, CommonFile::LOOP_TARGET_FILE);
         }
     }
 
@@ -292,5 +302,68 @@ class App
                 }
             }
         });
+    }
+
+    protected function doCrop(array $options, array $input) : void
+    {
+        $parser = new VideoParser($this, 0);
+        foreach ($input as $path) {
+            if (!file_exists($path)) {
+                throw new Exception('路径不存在: ' . $path);
+            }
+            $path = Utils::getFullPath($path);
+            $file = new CommonFile($path);
+            $file->map(function (CommonFile $file, string $relPath) use ($options, $parser) {
+                try {
+                    $parser->setFile($file);
+                    $info = $parser->getInfo();
+                    $crop = $parser->getCrop($info['duration']);
+                    $crop_str = ($crop[1] - $crop[0] + 1) . ':' . ($crop[3] - $crop[2] + 1) . ':' . $crop[0] . ':' . $crop[2];
+
+                    $this->print('crop: ' . $crop_str);
+                    if (empty($options['out'])) {
+                        return;
+                    }
+
+                    $cmd = 'ffmpeg -i \'' . $file->getFsPath() . '\'';
+                    if (!empty($options['aspect'])) {
+                        $cmd .= ' -aspect ' . $options['aspect'];
+                    }
+
+                    $cmd .= ' -vf crop=' . $crop_str;
+                    $cmd .= ' -preset slow -b:a ' . $info['ba'] . '  -c:a aac -c:v libx264 -b:v ' . $info['bv'] . ' \'' . $options['out'] . '\'';
+
+                    $process = new Process($cmd);
+                    $msgCache = '';
+                    $process->setCallback(function (string $name, int $stream, string $data) use (&$msgCache, $info) {
+                        if ($stream == 2) {
+                            $msgCache .= $data;
+
+                            $arr = explode('frame=', $msgCache);
+                            $count = count($arr);
+
+                            if (!preg_match('/^(\\d+) fps=(\\d+) .*? time=(\\d+):(\\d+):(\\d+).\\d+ .*$/', $arr[$count - 1])) {
+                                $msgCache = array_pop($arr);
+                            }
+
+                            $total = CommonUtils::showDuration($info['duration']);
+
+                            foreach ($arr as $line) {
+                                if (preg_match('/^\\s*(\\d+) fps=(\\d+) .*? time=(\\d+):(\\d+):(\\d+)\\.\\d+ .*/', $line, $matches)) {
+                                    $sec = $matches[3] * 3600 + $matches[4] * 60 + $matches[5];
+                                    $pecent = round($sec * 100 / $info['duration'], 2);
+
+                                    $line = 'frame=' . $matches[1] . ' fps=' . $matches[2] . ' time=' . $matches[3] . ':' . $matches[4] . ':' . $matches[5] . '/' . $total . ' ' . $pecent . '%';
+
+                                    $this->setStatus($line);
+                                }
+                            }
+                        }
+                    })->run();
+                    $this->console->reset();
+                } catch (Exception $ex) {
+                }
+            }, '', true, 0, CommonFile::LOOP_TARGET_FILE);
+        }
     }
 }

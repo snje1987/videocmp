@@ -29,6 +29,11 @@ use Phar;
 
 class VideoParser
 {
+    public function setFile(File $file)
+    {
+        $this->curFilePath = $file->getFsPath();
+    }
+
     public function parse(File $file, array $options)
     {
         if ($options['match'] < 1 || $options['match'] > 1000) {
@@ -38,7 +43,7 @@ class VideoParser
             throw new Exception('选项参数不合法: --distance');
         }
         try {
-            $this->curFilePath = $file->getFsPath();
+            $this->setFile($file);
             $this->curId = 0;
             $this->matchFrames = [];
             $this->options = $options;
@@ -101,8 +106,7 @@ class VideoParser
             }
 
             $this->app->setStatus('获取视频长度...');
-            $videoInfo = [];
-            $videoInfo['duration'] = $this->getDuration();
+            $videoInfo = $this->getInfo();
 
             $this->app->setStatus('获取视频边界...');
             $videoInfo['crop'] = $this->getCrop($videoInfo['duration']);
@@ -345,7 +349,7 @@ class VideoParser
         }
     }
 
-    protected function getCrop(int $duration) : array
+    public function getCrop(int $duration) : array
     {
         $offset = intval(($duration / 10));
         if ($offset <= 0) {
@@ -388,7 +392,7 @@ class VideoParser
         return $crop;
     }
 
-    protected function getDuration() : int
+    public function getInfo() : array
     {
         $cmd = 'ffprobe -v quiet -print_format json -show_streams "' . $this->curFilePath . '"';
         $json = (new Process($cmd))->exec(1);
@@ -398,6 +402,8 @@ class VideoParser
         }
 
         $duration = 0;
+        $bv = 0;
+        $ba = 0;
 
         foreach ($basic['streams'] as $v) {
             if (isset($v['duration'])) {
@@ -406,13 +412,22 @@ class VideoParser
                     $duration = $new_duration;
                 }
             }
+            if ($v['codec_type'] == 'audio') {
+                $ba = $v['bit_rate'];
+            } elseif ($v['codec_type'] == 'video') {
+                $bv = $v['bit_rate'];
+            }
         }
 
         if ($duration <= 1) {
             throw new Exception('不是视频文件：' . $this->curFilePath);
         }
 
-        return $duration;
+        return [
+            'duration' => $duration,
+            'ba' => $ba,
+            'bv' => $bv,
+        ];
     }
 
     protected function findFile(File $file, int $size)
