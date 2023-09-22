@@ -21,7 +21,6 @@ namespace Org\Snje\Videocmp;
 
 use Minifw\Common\Exception;
 use Minifw\Common\File as CommonFile;
-use Minifw\Common\FileUtils;
 use Minifw\Common\Utils as CommonUtils;
 use Minifw\Console\Console;
 use Minifw\Console\OptionParser;
