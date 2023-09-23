@@ -43,6 +43,6 @@ class Frame extends Table
         'PRIMARY' => ['fields' => ['id'], 'comment' => '主键'],
         'frame_file_id' => ['fields' => ['file_id']],
         'frame_hashh' => ['fields' => ['hashh']],
-        'frame_hashj' => ['fields' => ['hashl']],
+        'frame_hashl' => ['fields' => ['hashl']],
     ];
 }

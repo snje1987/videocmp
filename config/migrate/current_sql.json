@@ -1,0 +1,11 @@
+[
+    "CREATE TABLE IF NOT EXISTS `file` /* 文件信息 */ (\n`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT /* ID */,\n`name` text COLLATE binary NOT NULL /* 文件名 */,\n`path` text COLLATE binary NOT NULL /* 文件路径 */,\n`size` text COLLATE binary NOT NULL /* 大小 */,\n`sha` text COLLATE binary NOT NULL /* sha */,\n`frames` integer NOT NULL /* 总帧数 */\n)",
+    "CREATE UNIQUE INDEX `file_sha` on `file` (`sha`)",
+    "CREATE INDEX `size` on `file` (`size`)",
+    "CREATE TABLE IF NOT EXISTS `frame` /* 视频帧信息 */ (\n`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT /* ID */,\n`file_id` integer NOT NULL /* 文件ID */,\n`hashh` integer NOT NULL DEFAULT '' /* 高位信息 */,\n`hashl` integer NOT NULL DEFAULT '' /* 低位信息 */\n)",
+    "CREATE INDEX `frame_file_id` on `frame` (`file_id`)",
+    "CREATE INDEX `frame_hashh` on `frame` (`hashh`)",
+    "CREATE INDEX `frame_hashl` on `frame` (`hashl`)",
+    "CREATE TABLE IF NOT EXISTS `vari` /* 变量 */ (\n`id` integer NOT NULL PRIMARY KEY AUTOINCREMENT /* ID */,\n`type` text COLLATE binary NOT NULL /* 类型 */,\n`name` text COLLATE binary NOT NULL /* 名称 */,\n`value` text COLLATE binary NOT NULL /* 值 */\n)",
+    "CREATE INDEX `var_name` on `vari` (`type`,`name`)"
+]

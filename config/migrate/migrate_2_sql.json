@@ -1,0 +1,4 @@
+[
+    "DROP INDEX IF EXISTS `frame_hashj`",
+    "CREATE INDEX `frame_hashl` on `frame` (`hashl`)"
+]

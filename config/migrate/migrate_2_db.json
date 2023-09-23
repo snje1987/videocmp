@@ -1,0 +1,179 @@
+{
+    "file": {
+        "type": "table",
+        "tbname": "file",
+        "status": {
+            "rowid": true,
+            "comment": "文件信息"
+        },
+        "field": [
+            {
+                "name": "id",
+                "type": "integer",
+                "autoIncrement": true,
+                "comment": "ID"
+            },
+            {
+                "name": "name",
+                "type": "text",
+                "comment": "文件名",
+                "collate": "binary"
+            },
+            {
+                "name": "path",
+                "type": "text",
+                "comment": "文件路径",
+                "collate": "binary"
+            },
+            {
+                "name": "size",
+                "type": "text",
+                "comment": "大小",
+                "collate": "binary"
+            },
+            {
+                "name": "sha",
+                "type": "text",
+                "comment": "sha",
+                "collate": "binary"
+            },
+            {
+                "name": "frames",
+                "type": "integer",
+                "comment": "总帧数"
+            }
+        ],
+        "index": [
+            {
+                "name": "PRIMARY",
+                "fields": [
+                    "id"
+                ],
+                "comment": "主键"
+            },
+            {
+                "name": "file_sha",
+                "fields": [
+                    "sha"
+                ],
+                "unique": true
+            },
+            {
+                "name": "size",
+                "fields": [
+                    "size"
+                ]
+            }
+        ]
+    },
+    "frame": {
+        "type": "table",
+        "tbname": "frame",
+        "status": {
+            "rowid": true,
+            "comment": "视频帧信息"
+        },
+        "field": [
+            {
+                "name": "id",
+                "type": "integer",
+                "autoIncrement": true,
+                "comment": "ID"
+            },
+            {
+                "name": "file_id",
+                "type": "integer",
+                "comment": "文件ID"
+            },
+            {
+                "name": "hashh",
+                "type": "integer",
+                "comment": "高位信息",
+                "default": ""
+            },
+            {
+                "name": "hashl",
+                "type": "integer",
+                "comment": "低位信息",
+                "default": ""
+            }
+        ],
+        "index": [
+            {
+                "name": "PRIMARY",
+                "fields": [
+                    "id"
+                ],
+                "comment": "主键"
+            },
+            {
+                "name": "frame_file_id",
+                "fields": [
+                    "file_id"
+                ]
+            },
+            {
+                "name": "frame_hashh",
+                "fields": [
+                    "hashh"
+                ]
+            },
+            {
+                "name": "frame_hashl",
+                "fields": [
+                    "hashl"
+                ]
+            }
+        ]
+    },
+    "vari": {
+        "type": "table",
+        "tbname": "vari",
+        "status": {
+            "rowid": true,
+            "comment": "变量"
+        },
+        "field": [
+            {
+                "name": "id",
+                "type": "integer",
+                "autoIncrement": true,
+                "comment": "ID"
+            },
+            {
+                "name": "type",
+                "type": "text",
+                "comment": "类型",
+                "collate": "binary"
+            },
+            {
+                "name": "name",
+                "type": "text",
+                "comment": "名称",
+                "collate": "binary"
+            },
+            {
+                "name": "value",
+                "type": "text",
+                "comment": "值",
+                "collate": "binary"
+            }
+        ],
+        "index": [
+            {
+                "name": "PRIMARY",
+                "fields": [
+                    "id"
+                ],
+                "comment": "主键"
+            },
+            {
+                "name": "var_name",
+                "fields": [
+                    "type",
+                    "name"
+                ]
+            }
+        ]
+    }
+}
