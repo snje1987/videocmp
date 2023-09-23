@@ -10,7 +10,7 @@ return [
     'template' => [
         'distance' => [
             'alias' => 'd',
-            'comment' => '相似度判定参数, 0-3, 数字越大容忍度越高',
+            'comment' => '相似度判定参数, 0-1, 数字越大容忍度越高',
             'default' => 1,
             'type' => Option::PARAM_INT,
         ],

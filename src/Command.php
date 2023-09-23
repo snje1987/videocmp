@@ -67,17 +67,4 @@ abstract class Command extends ConsoleCommand
     {
         echo $this->parser->getManual() . "\n";
     }
-
-    protected function doConfig($options, $input) : void
-    {
-        if (!empty($options['get'])) {
-            $name = $options['get'];
-            echo $this->config->show($name) . "\n";
-        }
-        if (!empty($options['set'])) {
-            $pair = $options['set'];
-            $this->config->set($pair[0], $pair[1])->save();
-            echo $this->config->show($pair[0]) . "\n";
-        }
-    }
 }

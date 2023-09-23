@@ -1,0 +1,16 @@
+[
+    "DROP INDEX IF EXISTS `frame_hash1`",
+    "DROP INDEX IF EXISTS `frame_hash2`",
+    "DROP INDEX IF EXISTS `frame_hash3`",
+    "DROP INDEX IF EXISTS `frame_hash4`",
+    "ALTER TABLE `frame` ADD `hashh` integer NOT NULL DEFAULT '' /* 高位信息 */",
+    "ALTER TABLE `frame` ADD `hashl` integer NOT NULL DEFAULT '' /* 低位信息 */",
+    "UPDATE `frame` SET `hashh` = ((`hash1`<<16) | `hash2`)",
+    "UPDATE `frame` SET `hashl` = ((`hash3`<<16) | `hash4`)",
+    "ALTER TABLE `frame` DROP `hash1`",
+    "ALTER TABLE `frame` DROP `hash2`",
+    "ALTER TABLE `frame` DROP `hash3`",
+    "ALTER TABLE `frame` DROP `hash4`",
+    "CREATE INDEX `frame_hashh` on `frame` (`hashh`)",
+    "CREATE INDEX `frame_hashj` on `frame` (`hashl`)"
+]

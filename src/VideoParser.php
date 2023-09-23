@@ -21,6 +21,7 @@ namespace Org\Snje\Videocmp;
 
 use Minifw\Common\Exception;
 use Minifw\Common\File;
+use Minifw\Common\Perf;
 use Minifw\Common\Utils;
 use Minifw\Console\Process;
 use Org\Snje\Videocmp\Table\File as TableFile;
@@ -39,13 +40,14 @@ class VideoParser
         if ($options['match'] < 1 || $options['match'] > 1000) {
             throw new Exception('选项参数不合法: --match');
         }
-        if ($options['distance'] < 0 || $options['distance'] > 3) {
+        if ($options['distance'] < 0 || $options['distance'] > 1) {
             throw new Exception('选项参数不合法: --distance');
         }
         try {
             $this->setFile($file);
             $this->curId = 0;
             $this->matchFrames = [];
+            $this->saveFrames = [];
             $this->options = $options;
             $this->buffer = '';
             $this->frameTotal = 0;
@@ -114,12 +116,23 @@ class VideoParser
             $this->app->print("视频边界: \033[32m" . $videoInfo['crop_str'] . "\033[0m");
 
             $this->app->setStatus('开始分析视频: ' . $this->curFilePath);
+            $this->perf->start('total');
             $this->dumpVideo($videoInfo);
+            $this->perf->stop('total');
 
             if ($this->options['save'] && $this->curId > 0) {
+                $frameTable = Frame::get();
+                foreach ($this->saveFrames as $frame) {
+                    $frameTable->query()->insert($frame)->exec();
+                }
+
                 TableFile::get()->query()->update([
                     'frames' => $this->frameSaved,
                 ])->where(['id' => $this->curId])->exec();
+            }
+
+            if (DEBUG) {
+                $this->app->print('db: ' . Perf::showTime($this->perf->get('db')) . ' calc: ' . Perf::showTime($this->perf->get('calc')) . ' total: ' . Perf::showTime($this->perf->get('total')));
             }
 
             $this->app->reset();
@@ -263,8 +276,8 @@ class VideoParser
             $this->frameTotal++;
 
             $hashs = [];
-            for ($i = 0; $i < 8; $i += 2) {
-                $hashs[] = ord($this->buffer[$i]) << 8 | ord($this->buffer[$i + 1]);
+            for ($i = 0; $i < 8; $i += 4) {
+                $hashs[] = ord($this->buffer[$i]) << 24 | ord($this->buffer[$i + 1]) << 16 | ord($this->buffer[$i + 2]) << 8 | ord($this->buffer[$i + 3]);
             }
             $this->buffer = substr($this->buffer, 8);
             $this->matchHash($hashs);
@@ -282,13 +295,12 @@ class VideoParser
                         continue;
                     }
 
-                    Frame::get()->query()->insert([
+                    $this->saveFrames[] = [
                         'file_id' => $this->curId,
-                        'hash1' => $hashs[0],
-                        'hash2' => $hashs[1],
-                        'hash3' => $hashs[2],
-                        'hash4' => $hashs[3],
-                    ])->exec();
+                        'hashh' => $hashs[0],
+                        'hashl' => $hashs[1],
+                    ];
+
                     $this->frameSaved++;
                     $this->frameDelay--;
                 }
@@ -298,30 +310,22 @@ class VideoParser
 
     protected function matchHash($hashs) : void
     {
-        if ($this->options['distance'] > 1) {
-            $match = Frame::get()->query()->select([])->where([
-                'hash1' => $hashs[0],
-                'hash2' => $hashs[1],
-                'hash3' => $hashs[2],
-                'hash4' => $hashs[3],
-            ], true)->all()->exec();
-        } elseif ($this->options['distance'] > 0) {
-            $match = Frame::get()->query()->all()->query('select * from `' . Frame::$tbname . '` where (`hash1` = :hash1 and `hash2` = :hash2) or (`hash3` = :hash3 and `hash4` = :hash4)', [
-                'hash1' => $hashs[0],
-                'hash2' => $hashs[1],
-                'hash3' => $hashs[2],
-                'hash4' => $hashs[3],
+        $this->perf->start('db');
+        if ($this->options['distance'] > 0) {
+            $match = Frame::get()->query()->all()->query('select * from `' . Frame::$tbname . '` where `hashh` = :hashh or `hashl` = :hashl', [
+                'hashh' => $hashs[0],
+                'hashl' => $hashs[1],
             ]);
         } else {
             $match = Frame::get()->query()->select([])->where([
-                'hash1' => $hashs[0],
-                'hash2' => $hashs[1],
-                'hash3' => $hashs[2],
-                'hash4' => $hashs[3],
+                'hashh' => $hashs[0],
+                'hashl' => $hashs[1],
             ], false)->all()->exec();
         }
+        $this->perf->stop('db');
 
         if (!empty($match)) {
+            $this->perf->start('calc');
             $this->counter['selected'] += count($match);
             foreach ($match as $one) {
                 if ($one['file_id'] == $this->curId
@@ -332,9 +336,7 @@ class VideoParser
                 if ($this->options['distance'] > 0) {
                     $this->counter['match']++;
 
-                    $left = [
-                        $one['hash1'], $one['hash2'], $one['hash3'], $one['hash4'],
-                    ];
+                    $left = [$one['hashh'], $one['hashl']];
                     if (!$this->withinDistance($left, $hashs, $this->options['distance'])) {
                         continue;
                     }
@@ -346,6 +348,7 @@ class VideoParser
 
                 $this->matchFrames[$one['file_id']][$one['id']] = 1;
             }
+            $this->perf->stop('calc');
         }
     }
 
@@ -471,7 +474,7 @@ class VideoParser
     public static function checkFrame(array $hash) : bool
     {
         $distance = 0;
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 2; $i++) {
             $value = $hash[$i];
             for ($j = 0; $j < 16; $j++) {
                 if (($value & 1) == 1) {
@@ -491,7 +494,7 @@ class VideoParser
     public function withinDistance(array $hash1, array $hash2, int $max)
     {
         $distance = 0;
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 2; $i++) {
             $match = ($hash1[$i] ^ $hash2[$i]);
             if (!isset($this->hashLen[$match])) {
                 return false;
@@ -575,6 +578,7 @@ class VideoParser
 
     ////////////////////////////////////////////////
 
+    protected Perf $perf;
     protected string $curFilePath;
     protected string $buffer = '';
     protected int $frameTotal = 0;
@@ -585,9 +589,10 @@ class VideoParser
     protected array $options;
     protected array $counter = [];
     protected array $hashLen = [];
+    protected array $saveFrames = [];
     protected string $msgCache = '';
     const FRAME_SIZE = 8;
-    const HASH_LEN = 16;
+    const HASH_LEN = 32;
     const FRAME_STEP = 25;
 
     public function __construct(?App $app, ?int $distance = 0)
@@ -596,6 +601,7 @@ class VideoParser
         if ($distance > 0) {
             $this->hashLen = self::buildHashLen($distance);
         }
+        $this->perf = new Perf();
     }
     protected ?App $app;
 }

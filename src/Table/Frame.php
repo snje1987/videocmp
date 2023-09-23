@@ -36,17 +36,13 @@ class Frame extends Table
     public static array $field = [
         'id' => ['type' => 'int', 'autoIncrement' => true, 'comment' => 'ID'],
         'file_id' => ['type' => 'int', 'comment' => '文件ID'],
-        'hash1' => ['type' => 'int', 'comment' => '帧信息1'],
-        'hash2' => ['type' => 'int', 'comment' => '帧信息2'],
-        'hash3' => ['type' => 'int', 'comment' => '帧信息3'],
-        'hash4' => ['type' => 'int', 'comment' => '帧信息4'],
+        'hashh' => ['type' => 'int', 'default' => '', 'comment' => '高位信息'],
+        'hashl' => ['type' => 'int', 'default' => '', 'comment' => '低位信息'],
     ];
     public static array $index = [
         'PRIMARY' => ['fields' => ['id'], 'comment' => '主键'],
         'frame_file_id' => ['fields' => ['file_id']],
-        'frame_hash1' => ['fields' => ['hash1']],
-        'frame_hash2' => ['fields' => ['hash2']],
-        'frame_hash3' => ['fields' => ['hash3']],
-        'frame_hash4' => ['fields' => ['hash4']],
+        'frame_hashh' => ['fields' => ['hashh']],
+        'frame_hashj' => ['fields' => ['hashl']],
     ];
 }
