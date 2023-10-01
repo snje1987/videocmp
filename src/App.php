@@ -330,7 +330,7 @@ class App
                     }
 
                     $cmd .= ' -vf crop=' . $crop_str;
-                    $cmd .= ' -preset slow -b:a ' . $info['ba'] . '  -c:a aac -c:v libx264 -b:v ' . $info['bv'] . ' \'' . $options['out'] . '\'';
+                    $cmd .= ' -preset slower  -c:a aac -c:v libx264 -crf 23 \'' . $options['out'] . '\'';
 
                     $process = new Process($cmd);
                     $msgCache = '';
