@@ -126,7 +126,7 @@ return [
                 ],
                 'dir' => [
                     'alias' => 'd',
-                    'comment' => '转码后的视频保存目录',
+                    'comment' => '转码后的视频保存目录，不指定的只进行裁减检测，不进行转码',
                     'default' => '',
                     'type' => Option::PARAM_PATH,
                 ],
