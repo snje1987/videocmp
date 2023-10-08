@@ -404,7 +404,9 @@ class App
 
                     $cmd .= ' \'' . $outPath . '\'';
 
-                    file_put_contents($options['out'], 'out: ' . $outPath . "\n", FILE_APPEND);
+                    if (!empty($options['out'])) {
+                        file_put_contents($options['out'], 'out: ' . $outPath . "\n", FILE_APPEND);
+                    }
 
                     $process = new Process($cmd);
                     $msgCache = '';
