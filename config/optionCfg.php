@@ -4,7 +4,6 @@ use Minifw\Console\Option;
 return [
     'oppositePrefix' => 'no-',
     'comment' => [
-        'usage: videocmp [action] [options] file|dir ...',
         '视频对比工具，可以分析视频的相似度，查找相似的视频',
     ],
     'template' => [
@@ -38,6 +37,12 @@ return [
     'actions' => [
         'scan' => [
             'comment' => ['分析指定的目录或文件，在数据库中查找相似的视频，可以同时将该视频的信息记录进数据库'],
+            'input' => [
+                'comment' => '待扫描的文件列表',
+                'type' => Option::PARAM_ARRAY,
+                'dataType' => Option::PARAM_PATH,
+                'default' => [],
+            ],
             'options' => [
                 'out' => [
                     'alias' => 'o',
@@ -81,8 +86,26 @@ return [
             ]
         ],
         'crop' => [
-            'comment' => ['自动裁减视频'],
+            'comment' => ['自动裁减视频，去除视频黑边'],
+            'input' => [
+                'comment' => '待处理的文件列表',
+                'type' => Option::PARAM_ARRAY,
+                'dataType' => Option::PARAM_PATH,
+                'default' => [],
+            ],
             'options' => [
+                'bitrate' => [
+                    'alias' => 'br',
+                    'comment' => '如指定该参数，则转码时使用该码率，如设置为0，则使用源视频码率',
+                    'default' => -1,
+                    'type' => Option::PARAM_INT,
+                ],
+                'crf' => [
+                    'alias' => 'crf',
+                    'comment' => '如未指定码率，则转码时采用crf模式',
+                    'default' => 23,
+                    'type' => Option::PARAM_INT,
+                ],
                 'aspect' => [
                     'alias' => 'a',
                     'comment' => '视频比例',
@@ -92,7 +115,7 @@ return [
                 'out' => [
                     'alias' => 'o',
                     'comment' => '结果保存路径，为空则不保存',
-                    'default' => '',
+                    'default' => 'cai',
                     'type' => Option::PARAM_PATH,
                 ],
             ]

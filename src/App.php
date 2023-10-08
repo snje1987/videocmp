@@ -330,7 +330,17 @@ class App
                     }
 
                     $cmd .= ' -vf crop=' . $crop_str;
-                    $cmd .= ' -preset slower  -c:a aac -c:v libx264 -crf 23 \'' . $options['out'] . '\'';
+                    $cmd .= ' -preset slower -movflags +faststart -c:a aac -c:v libx264 -b:a ' . $info['ba'];
+
+                    if ($options['bitrate'] === -1) {
+                        $cmd .= ' -crf ' . $options['crf'];
+                    } elseif ($options['bitrate'] === 0) {
+                        $cmd .= ' -b:v ' . $info['bv'];
+                    } else {
+                        $cmd .= ' -b:v ' . $options['bitrate'];
+                    }
+
+                    $cmd .= ' \'' . $options['out'] . '\'';
 
                     $process = new Process($cmd);
                     $msgCache = '';
