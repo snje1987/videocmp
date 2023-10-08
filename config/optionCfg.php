@@ -106,16 +106,34 @@ return [
                     'default' => 23,
                     'type' => Option::PARAM_INT,
                 ],
+                'minx' => [
+                    'alias' => 'x',
+                    'comment' => '当x轴差别小于该值时，则不处理该视频',
+                    'default' => 8,
+                    'type' => Option::PARAM_INT,
+                ],
+                'miny' => [
+                    'alias' => 'y',
+                    'comment' => '当y轴差别小于该值时，则不处理该视频',
+                    'default' => 8,
+                    'type' => Option::PARAM_INT,
+                ],
                 'aspect' => [
                     'alias' => 'a',
                     'comment' => '视频比例',
                     'default' => '',
                     'type' => Option::PARAM_STRING,
                 ],
+                'dir' => [
+                    'alias' => 'd',
+                    'comment' => '转码后的视频保存目录',
+                    'default' => '',
+                    'type' => Option::PARAM_PATH,
+                ],
                 'out' => [
                     'alias' => 'o',
-                    'comment' => '结果保存路径，为空则不保存',
-                    'default' => 'cai',
+                    'comment' => '被裁减视频的信息',
+                    'default' => '',
                     'type' => Option::PARAM_PATH,
                 ],
             ]

@@ -21,6 +21,7 @@ namespace Org\Snje\Videocmp;
 
 use Minifw\Common\Exception;
 use Minifw\Common\File as CommonFile;
+use Minifw\Common\FileUtils;
 use Minifw\Common\Utils as CommonUtils;
 use Minifw\Console\Console;
 use Minifw\Console\OptionParser;
@@ -60,6 +61,34 @@ class App
         }
 
         return self::$instance;
+    }
+
+    public static function makeUniq(string $path)
+    {
+        if (!file_exists($path)) {
+            return $path;
+        }
+
+        $count = 0;
+
+        $temp = pathinfo($path);
+        $name = $temp['filename'];
+        $path = $temp['dirname'];
+
+        $ext = '';
+        if (isset($temp['extension'])) {
+            $ext = '.' . $temp['extension'];
+        }
+
+        while ($count < 1000) {
+            $newPath = $path . '/' . $name . '_' . $count . '.' . $ext;
+            if (!file_exists($newPath)) {
+                return $newPath;
+            }
+            $count++;
+        }
+
+        return null;
     }
 
     protected function __construct($argv)
@@ -305,6 +334,12 @@ class App
 
     protected function doCrop(array $options, array $input) : void
     {
+        if (!empty($options['dir'])) {
+            if (!file_exists($options['dir'])) {
+                mkdir($options['dir'], 0777, true);
+            }
+        }
+
         $parser = new VideoParser($this, 0);
         foreach ($input as $path) {
             if (!file_exists($path)) {
@@ -314,13 +349,30 @@ class App
             $file = new CommonFile($path);
             $file->map(function (CommonFile $file, string $relPath) use ($options, $parser) {
                 try {
+                    $this->setStatus($file->getFsPath());
+
                     $parser->setFile($file);
                     $info = $parser->getInfo();
                     $crop = $parser->getCrop($info['duration']);
+
+                    if ($info['width'] - ($crop[1] - $crop[0] + 1) < $options['minx']
+                    && $info['height'] - ($crop[3] - $crop[2] + 1) < $options['miny']) {
+                        return;
+                    }
+
                     $crop_str = ($crop[1] - $crop[0] + 1) . ':' . ($crop[3] - $crop[2] + 1) . ':' . $crop[0] . ':' . $crop[2];
 
-                    $this->print('crop: ' . $crop_str);
-                    if (empty($options['out'])) {
+                    $lines = [];
+                    $lines[] = $file->getFsPath();
+                    $lines[] = 'width: ' . $info['width'] . ' height: ' . $info['height'] . ' crop: ' . $crop_str;
+
+                    $this->print($lines[0]);
+                    $this->print($lines[1]);
+                    if (!empty($options['out'])) {
+                        file_put_contents($options['out'], implode("\n", $lines) . "\n", FILE_APPEND);
+                    }
+
+                    if (empty($options['dir'])) {
                         return;
                     }
 
@@ -335,12 +387,24 @@ class App
                     if ($options['bitrate'] === -1) {
                         $cmd .= ' -crf ' . $options['crf'];
                     } elseif ($options['bitrate'] === 0) {
+                        if ($info['bv'] <= 0) {
+                            throw new Exception('缺少视频码率信息');
+                        }
                         $cmd .= ' -b:v ' . $info['bv'];
                     } else {
                         $cmd .= ' -b:v ' . $options['bitrate'];
                     }
 
-                    $cmd .= ' \'' . $options['out'] . '\'';
+                    $fileName = $file->getName();
+                    $outPath = FileUtils::pathJoin($options['dir'], $fileName);
+                    $outPath = self::makeUniq($outPath);
+                    if ($outPath === null) {
+                        throw new Exception('存在重复文件');
+                    }
+
+                    $cmd .= ' \'' . $outPath . '\'';
+
+                    file_put_contents($options['out'], 'out: ' . $outPath . "\n", FILE_APPEND);
 
                     $process = new Process($cmd);
                     $msgCache = '';
@@ -374,5 +438,7 @@ class App
                 }
             }, '', true, 0, CommonFile::LOOP_TARGET_FILE);
         }
+
+        $this->reset();
     }
 }
