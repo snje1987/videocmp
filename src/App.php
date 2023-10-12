@@ -63,25 +63,25 @@ class App
         return self::$instance;
     }
 
-    public static function makeUniq(string $path)
+    public static function makeUniq(string $path, $ext = null)
     {
-        if (!file_exists($path)) {
-            return $path;
-        }
-
         $count = 0;
 
         $temp = pathinfo($path);
         $name = $temp['filename'];
-        $path = $temp['dirname'];
+        $dir = $temp['dirname'];
 
-        $ext = '';
-        if (isset($temp['extension'])) {
+        if ($ext === null && isset($temp['extension'])) {
             $ext = '.' . $temp['extension'];
         }
 
+        $opath = $dir . '/' . $name . $ext;
+        if (!file_exists($opath)) {
+            return $opath;
+        }
+
         while ($count < 1000) {
-            $newPath = $path . '/' . $name . '_' . $count . '.' . $ext;
+            $newPath = $dir . '/' . $name . '_' . $count . $ext;
             if (!file_exists($newPath)) {
                 return $newPath;
             }
@@ -313,20 +313,26 @@ class App
     {
         File::get()->query()->all()->map(function ($data) use ($options) {
             $path = $data['path'];
-            if (!file_exists($path)) {
-                $this->print($data['path']);
-                if ($options['save']) {
-                    try {
-                        $this->driver->begin();
 
-                        File::get()->query()->delete()->where(['id' => $data['id']])->exec();
-                        Frame::get()->query()->delete()->where(['file_id' => $data['id']])->exec();
+            if (file_exists($path)) {
+                $size = filesize($path);
+                if ($size == $data['size']) {
+                    return;
+                }
+            }
 
-                        $this->driver->commit();
-                    } catch (Exception $ex) {
-                        $this->driver->rollback();
-                        throw $ex;
-                    }
+            $this->print($data['path']);
+            if ($options['save']) {
+                try {
+                    $this->driver->begin();
+
+                    File::get()->query()->delete()->where(['id' => $data['id']])->exec();
+                    Frame::get()->query()->delete()->where(['file_id' => $data['id']])->exec();
+
+                    $this->driver->commit();
+                } catch (Exception $ex) {
+                    $this->driver->rollback();
+                    throw $ex;
                 }
             }
         });
@@ -353,14 +359,22 @@ class App
 
                     $parser->setFile($file);
                     $info = $parser->getInfo();
-                    $crop = $parser->getCrop($info['duration']);
 
-                    if ($info['width'] - ($crop[1] - $crop[0] + 1) < $options['minx']
+                    if (empty($options['crop'])) {
+                        $crop = $parser->getCrop($info['duration']);
+                        if ($info['width'] - ($crop[1] - $crop[0] + 1) < $options['minx']
                     && $info['height'] - ($crop[3] - $crop[2] + 1) < $options['miny']) {
-                        return;
-                    }
+                            return;
+                        }
 
-                    $crop_str = ($crop[1] - $crop[0] + 1) . ':' . ($crop[3] - $crop[2] + 1) . ':' . $crop[0] . ':' . $crop[2];
+                        $crop_str = ($crop[1] - $crop[0] + 1) . ':' . ($crop[3] - $crop[2] + 1) . ':' . $crop[0] . ':' . $crop[2];
+                    } else {
+                        if ($info['width'] - $options['crop'][0] < $options['minx']
+                    && $info['height'] - $options['crop'][1] < $options['miny']) {
+                            return;
+                        }
+                        $crop_str = implode(':', $options['crop']);
+                    }
 
                     $lines = [];
                     $lines[] = $file->getFsPath();
@@ -382,7 +396,7 @@ class App
                     }
 
                     $cmd .= ' -vf crop=' . $crop_str;
-                    $cmd .= ' -preset slower -movflags +faststart -c:a aac -c:v libx264 -b:a ' . $info['ba'];
+                    $cmd .= ' -preset slow -movflags +faststart -c:a aac -c:v libx264 -b:a ' . $info['ba'];
 
                     if ($options['bitrate'] === -1) {
                         $cmd .= ' -crf ' . $options['crf'];
@@ -397,7 +411,7 @@ class App
 
                     $fileName = $file->getName();
                     $outPath = FileUtils::pathJoin($options['dir'], $fileName);
-                    $outPath = self::makeUniq($outPath);
+                    $outPath = self::makeUniq($outPath, '.mp4');
                     if ($outPath === null) {
                         throw new Exception('存在重复文件');
                     }

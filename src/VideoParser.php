@@ -116,6 +116,7 @@ class VideoParser
             $this->app->print("视频边界: \033[32m" . $videoInfo['crop_str'] . "\033[0m");
 
             $this->app->setStatus('开始分析视频: ' . $this->curFilePath);
+            $this->perf->reset();
             $this->perf->start('total');
             $this->dumpVideo($videoInfo);
             $this->perf->stop('total');
@@ -147,7 +148,7 @@ class VideoParser
         }
     }
 
-    protected function parseMatch(): ?array
+    protected function parseMatch() : ?array
     {
         if (empty($this->matchFrames)) {
             return null;
@@ -220,7 +221,7 @@ class VideoParser
         $this->app->setStatus($msg);
     }
 
-    protected function dumpVideo(array $videoInfo): void
+    protected function dumpVideo(array $videoInfo) : void
     {
         $phar = __FILE__;
         if (strncmp($phar, 'phar://', 7) == 0) {
@@ -268,7 +269,7 @@ class VideoParser
         })->run();
     }
 
-    protected function dumpFrame(string $data): void
+    protected function dumpFrame(string $data) : void
     {
         $this->buffer .= $data;
 
@@ -308,7 +309,7 @@ class VideoParser
         }
     }
 
-    protected function matchHash($hashs): void
+    protected function matchHash($hashs) : void
     {
         $this->perf->start('db');
         if ($this->options['distance'] > 0) {
@@ -352,7 +353,7 @@ class VideoParser
         }
     }
 
-    public function getCrop(int $duration): array
+    public function getCrop(int $duration) : array
     {
         $offset = intval(($duration / 10));
         if ($offset <= 0) {
@@ -375,14 +376,15 @@ class VideoParser
             $result = (new Process($cmd))->exec(1);
             $result = explode("\n", $result);
             foreach ($result as $v) {
-                if (preg_match('/x1:(\\d+) x2:(\\d+) y1:(\\d+) y2:(\\d+) w:(\\d+) h:(\\d+)/', $v, $matches)) {
+                if (preg_match('/w:(\\d+) h:(\\d+) x:(\\d+) y:(\\d+)/', $v, $matches)) {
+                    $offset = [$matches[3], $matches[3] + $matches[1] - 1, $matches[4], $matches[4] + $matches[2] - 1];
                     if ($crop === null) {
-                        $crop = [$matches[1], $matches[2], $matches[3], $matches[4]];
+                        $crop = [$offset[0], $offset[1], $offset[2], $offset[3]];
                     } else {
-                        $crop[0] = $crop[0] <= $matches[1] ? $crop[0] : $matches[1];
-                        $crop[1] = $crop[1] >= $matches[2] ? $crop[1] : $matches[2];
-                        $crop[2] = $crop[2] <= $matches[3] ? $crop[2] : $matches[3];
-                        $crop[3] = $crop[3] >= $matches[4] ? $crop[3] : $matches[4];
+                        $crop[0] = $crop[0] <= $offset[0] ? $crop[0] : $offset[0];
+                        $crop[1] = $crop[1] >= $offset[1] ? $crop[1] : $offset[1];
+                        $crop[2] = $crop[2] <= $offset[2] ? $crop[2] : $offset[2];
+                        $crop[3] = $crop[3] >= $offset[3] ? $crop[3] : $offset[3];
                     }
                 }
             }
@@ -395,7 +397,7 @@ class VideoParser
         return $crop;
     }
 
-    public function getInfo(): array
+    public function getInfo() : array
     {
         $cmd = 'ffprobe -v quiet -print_format json -show_streams "' . $this->curFilePath . '"';
         $json = (new Process($cmd))->exec(1);
@@ -420,7 +422,7 @@ class VideoParser
             }
             if ($v['codec_type'] == 'audio') {
                 $ba = $v['bit_rate'] ?? 0;
-                if($ba == 0) {
+                if ($ba == 0) {
                     throw new Exception('缺少音频码率信息');
                 }
             } elseif ($v['codec_type'] == 'video') {
@@ -481,7 +483,7 @@ class VideoParser
         return null;
     }
 
-    public static function checkFrame(array $hash): bool
+    public static function checkFrame(array $hash) : bool
     {
         $distance = 0;
         for ($i = 0; $i < 2; $i++) {
@@ -519,7 +521,7 @@ class VideoParser
         return true;
     }
 
-    public static function buildHashLen(int $max): array
+    public static function buildHashLen(int $max) : array
     {
         if ($max <= 0) {
             return [];
@@ -538,7 +540,7 @@ class VideoParser
         return $ret;
     }
 
-    public static function buildHash(int $len, int $begin): array
+    public static function buildHash(int $len, int $begin) : array
     {
         if ($len <= 0 || $begin >= self::HASH_LEN - $len + 1) {
             return [];
@@ -567,7 +569,7 @@ class VideoParser
         return $ret;
     }
 
-    public static function isVideo(string $filename): bool
+    public static function isVideo(string $filename) : bool
     {
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
         $ext_list = [

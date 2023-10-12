@@ -120,9 +120,14 @@ return [
                 ],
                 'aspect' => [
                     'alias' => 'a',
-                    'comment' => '视频比例',
+                    'comment' => '视频比例，格式 [宽度]:[高度]，如 4:3 16:9',
                     'default' => '',
                     'type' => Option::PARAM_STRING,
+                ],
+                'crop' => [
+                    'comment' => '裁减尺寸，格式 [宽度] [高度] [左边界] [上边界]，不指定则会自动检测',
+                    'default' => [],
+                    'type' => [Option::PARAM_INT, Option::PARAM_INT, Option::PARAM_INT, Option::PARAM_INT],
                 ],
                 'dir' => [
                     'alias' => 'd',
